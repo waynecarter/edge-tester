@@ -70,7 +70,7 @@ public class Server {
                             pout.print(
                                 "HTTP/1.0 200 OK" + NEW_LINE +
                                 "Cache-Control: no-store" + NEW_LINE +
-                                "Max-Age=0" + NEW_LINE +
+                                "Cache-Control: max-age=0" + NEW_LINE +
                                 "Content-Type: application/json; charset=utf-8" + NEW_LINE +
                                 "Content-length: " + (json != null ? json.length() : 0) + NEW_LINE +
                                 NEW_LINE +
