@@ -5,7 +5,7 @@ import com.couchbase.lite.*;
 public class LiteServer {
     public static void main(String[] args) throws Exception {
         CouchbaseLite.init();
-        Database db = new Database("edge-server");
+        Database db = new Database("lite-server");
 
         // If a Sync Gateway URL is provided, start replicator
         String sgURL = (args.length > 0 ? args[0] : null);
