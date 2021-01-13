@@ -8,12 +8,131 @@
 import UIKit
 
 class ViewController: UIViewController {
-
+    @IBOutlet var out: UITextView!
+    @IBOutlet var progressView: UIProgressView!
+    @IBOutlet var startButton: UIBarButtonItem!
+    @IBOutlet var shareButton: UIBarButtonItem!
+    
+    struct RequestResult {
+        let start: Double
+        let duration: Double
+        let status: Int
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
     }
+    
+    @IBAction func start(_ sender: Any) {
+        DispatchQueue.global(qos: .background).async {
+            DispatchQueue.main.sync {
+                self.startButton.isEnabled = false
+                self.out.text = nil
+                self.progressView.progress = 0
+            }
+            
+            self.runTest()
+            
+            DispatchQueue.main.sync {
+                let alert = UIAlertController(title: "Test complete.", message: nil, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                self.present(alert, animated: true)
+                
+                self.progressView.progress = 0
+                self.startButton.isEnabled = true
+            }
+        }
+    }
+    
+    @IBAction func share(_ sender: Any) {
+        let viewController = UIActivityViewController(activityItems: [ out.text ?? "" ], applicationActivities: nil)
+        viewController.popoverPresentationController?.sourceView = self.view
 
+        self.present(viewController, animated: true, completion: nil)
+    }
+    
+    private func runTest() {
+        let testIterations = 10
+        
+        for i in 1...testIterations {
+            let awsZoneHost = "54.244.149.31:8080"
+            let awsZoneSetUrl = "http://\(awsZoneHost)/set?id=object\(i)&json=%7Bname=%22Object%20\(i)%22%7D"
+            let awsZoneGetUrl = "http://\(awsZoneHost)/get?id=object\(i)"
+            
+            log(
+                target: "AWS Zone",
+                requestType: "Set",
+                result: makeRequest(urlString: awsZoneSetUrl)
+            )
+            
+            log(
+                target: "AWS Zone",
+                requestType: "Get",
+                result: makeRequest(urlString: awsZoneGetUrl)
+            )
+            
+            let awsWavelengthZoneHost = "155.146.22.181:8080"
+            let awsWavelengthZoneSetUrl = "http://\(awsWavelengthZoneHost)/set?id=object\(i)&json=%7Bname=%22Object%20\(i)%22%7D"
+            let awsWavelengthZoneGetUrl = "http://\(awsWavelengthZoneHost)/get?id=object\(i)"
 
+            log(
+                target: "AWS Wavelength Zone",
+                requestType: "Set",
+                result: makeRequest(urlString: awsWavelengthZoneSetUrl)
+            )
+
+            log(
+                target: "AWS Wavelength Zone",
+                requestType: "Get",
+                result: makeRequest(urlString: awsWavelengthZoneGetUrl)
+            )
+            
+            DispatchQueue.main.sync {
+                progressView.progress = Float(i) / Float(testIterations)
+            }
+            
+            // Sleep 1 second
+            sleep(1)
+        }
+    }
+    
+    private func makeRequest(urlString: String) -> RequestResult {
+        let request = URLRequest(
+            url: URL(string: urlString)!
+        )
+        
+        var response: URLResponse?
+        var startTime: Double = 0
+        var endTime: Double = 0
+        var statusCode: Int = 0
+        do {
+            startTime = Date().timeIntervalSince1970
+            try NSURLConnection.sendSynchronousRequest(request, returning: &response)
+            endTime = Date().timeIntervalSince1970
+            
+            if let response = response as? HTTPURLResponse, response.statusCode == 200 {
+                statusCode = response.statusCode
+            }
+        } catch {
+            // Do nothing
+        }
+        
+        return RequestResult(
+            start: startTime,
+            duration: endTime - startTime,
+            status: statusCode
+        )
+    }
+    
+    private func log(target: String, requestType: String, result: RequestResult) {
+        DispatchQueue.main.async {
+            if self.out.text.count == 0 {
+                self.out.text.append("Target,RequestType,ResponseStatus,Start,Duration")
+            }
+            
+            self.out.text.append("\n\(target),\(requestType),\(result.status),\(result.start),\(result.duration)")
+        }
+    }
 }
 

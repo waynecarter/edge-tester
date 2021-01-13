@@ -56,12 +56,12 @@
 		A3F15FA725AE6090007770B1 /* Client */ = {
 			isa = PBXGroup;
 			children = (
+				A3F15FAE25AE6090007770B1 /* Main.storyboard */,
+				A3F15FB325AE6092007770B1 /* LaunchScreen.storyboard */,
 				A3F15FA825AE6090007770B1 /* AppDelegate.swift */,
 				A3F15FAA25AE6090007770B1 /* SceneDelegate.swift */,
 				A3F15FAC25AE6090007770B1 /* ViewController.swift */,
-				A3F15FAE25AE6090007770B1 /* Main.storyboard */,
 				A3F15FB125AE6092007770B1 /* Assets.xcassets */,
-				A3F15FB325AE6092007770B1 /* LaunchScreen.storyboard */,
 				A3F15FB625AE6092007770B1 /* Info.plist */,
 			);
 			path = Client;
@@ -287,13 +287,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 47N526Z23H;
+				DEVELOPMENT_TEAM = N2Q372V7W2;
 				INFOPLIST_FILE = Client/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "aws-wavelength-test.Client";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.couchbase.aws-wavelength-test.Client";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -306,13 +306,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 47N526Z23H;
+				DEVELOPMENT_TEAM = N2Q372V7W2;
 				INFOPLIST_FILE = Client/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "aws-wavelength-test.Client";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.couchbase.aws-wavelength-test.Client";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
