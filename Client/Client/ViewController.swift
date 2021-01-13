@@ -53,39 +53,63 @@ class ViewController: UIViewController {
     }
     
     private func runTest() {
-        let testIterations = 10
+        let testIterations = 100
+        let payloadLength = 1000
+        
+        let awsZoneHost = "54.244.149.31:8080"
+        let awsWavelengthZoneHost = "155.146.22.181:8080"
         
         for i in 1...testIterations {
-            let awsZoneHost = "54.244.149.31:8080"
-            let awsZoneSetUrl = "http://\(awsZoneHost)/set?id=object\(i)&json=%7Bname=%22Object%20\(i)%22%7D"
-            let awsZoneGetUrl = "http://\(awsZoneHost)/get?id=object\(i)"
+            let data = string(withLength: payloadLength)
+
+            // AWS Zone
             
             log(
                 target: "AWS Zone",
                 requestType: "Set",
-                result: makeRequest(urlString: awsZoneSetUrl)
+                result: makeRequest(
+                    urlString: setUrlString(
+                        withHost: awsZoneHost,
+                        iterationIndex: i,
+                        data: data
+                    )
+                )
             )
             
             log(
                 target: "AWS Zone",
                 requestType: "Get",
-                result: makeRequest(urlString: awsZoneGetUrl)
+                result: makeRequest(
+                    urlString: getUrlString(
+                        withHost: awsZoneHost,
+                        iterationIndex: i
+                    )
+                )
             )
             
-            let awsWavelengthZoneHost = "155.146.22.181:8080"
-            let awsWavelengthZoneSetUrl = "http://\(awsWavelengthZoneHost)/set?id=object\(i)&json=%7Bname=%22Object%20\(i)%22%7D"
-            let awsWavelengthZoneGetUrl = "http://\(awsWavelengthZoneHost)/get?id=object\(i)"
+            // AWS Wavelength
 
             log(
                 target: "AWS Wavelength Zone",
                 requestType: "Set",
-                result: makeRequest(urlString: awsWavelengthZoneSetUrl)
+                result: makeRequest(
+                    urlString: setUrlString(
+                        withHost: awsWavelengthZoneHost,
+                        iterationIndex: i,
+                        data: data
+                    )
+                )
             )
 
             log(
                 target: "AWS Wavelength Zone",
                 requestType: "Get",
-                result: makeRequest(urlString: awsWavelengthZoneGetUrl)
+                result: makeRequest(
+                    urlString: getUrlString(
+                        withHost: awsWavelengthZoneHost,
+                        iterationIndex: i
+                    )
+                )
             )
             
             DispatchQueue.main.sync {
@@ -95,6 +119,14 @@ class ViewController: UIViewController {
             // Sleep 1 second
             sleep(1)
         }
+    }
+    
+    private func getUrlString(withHost host: String, iterationIndex: Int) -> String {
+        return "http://\(host)/get?id=object\(iterationIndex)"
+    }
+    
+    private func setUrlString(withHost host: String, iterationIndex: Int, data: String) -> String {
+        return "http://\(host)/set?id=object\(iterationIndex)&json=%7B%22data%22:%22\(data)%22%7D"
     }
     
     private func makeRequest(urlString: String) -> RequestResult {
@@ -125,6 +157,12 @@ class ViewController: UIViewController {
         )
     }
     
+    private func string(withLength length: Int) -> String {
+        let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+        return String((0..<length).map{ _ in letters.randomElement()! })
+    }
+
     private func log(target: String, requestType: String, result: RequestResult) {
         DispatchQueue.main.async {
             if self.out.text.count == 0 {
