@@ -14,9 +14,10 @@ class ViewController: UIViewController {
     @IBOutlet var shareButton: UIBarButtonItem!
     
     struct RequestResult {
+        let status: Int
         let start: Double
         let duration: Double
-        let status: Int
+        let dbDuration: Double
     }
     
     override func viewDidLoad() {
@@ -135,25 +136,38 @@ class ViewController: UIViewController {
         )
         
         var response: URLResponse?
+        var statusCode: Int = 0
         var startTime: Double = 0
         var endTime: Double = 0
-        var statusCode: Int = 0
+        var dbDuration: Double = 0
+        
         do {
             startTime = Date().timeIntervalSince1970
             try NSURLConnection.sendSynchronousRequest(request, returning: &response)
             endTime = Date().timeIntervalSince1970
             
-            if let response = response as? HTTPURLResponse, response.statusCode == 200 {
+            if let response = response as? HTTPURLResponse {
                 statusCode = response.statusCode
+                
+                if let serverTimings = response.value(forHTTPHeaderField: "Server-Timing")?.split(separator: ",") {
+                    for serverTiming in serverTimings {
+                        if let timingRange = serverTiming.range(of: "db;dur="),
+                           let timingDuration = Double(serverTiming[timingRange.upperBound...])
+                        {
+                            dbDuration = timingDuration
+                        }
+                    }
+                }
             }
         } catch {
             // Do nothing
         }
         
         return RequestResult(
+            status: statusCode,
             start: startTime,
             duration: endTime - startTime,
-            status: statusCode
+            dbDuration: dbDuration
         )
     }
     
@@ -166,10 +180,10 @@ class ViewController: UIViewController {
     private func log(target: String, requestType: String, result: RequestResult) {
         DispatchQueue.main.async {
             if self.out.text.count == 0 {
-                self.out.text.append("Target,RequestType,ResponseStatus,Start,Duration")
+                self.out.text.append("Target,RequestType,ResponseStatus,Start,Duration,DB Duration")
             }
             
-            self.out.text.append("\n\(target),\(requestType),\(result.status),\(result.start),\(result.duration)")
+            self.out.text.append("\n\(target),\(requestType),\(result.status),\(result.start),\(result.duration),\(result.dbDuration)")
         }
     }
 }
