@@ -1,4 +1,5 @@
 import java.net.*;
+import java.util.Date;
 import java.io.*;
 
 public class Server {
@@ -65,13 +66,17 @@ public class Server {
                                 }
                             }
                             
+                            double dbStartTime = System.nanoTime();
                             String json = getter.get(id);
+                            double dbEndTime = System.nanoTime();
+                            double dbDuration = ((dbEndTime - dbStartTime) / (double)1000000); // Milliseconds
                             
                             pout.print(
                                 "HTTP/1.0 200 OK" + NEW_LINE +
                                 "Cache-Control: no-store, max-age=0" + NEW_LINE +
                                 "Content-Type: application/json; charset=utf-8" + NEW_LINE +
                                 "Content-length: " + (json != null ? json.length() : 0) + NEW_LINE +
+                                "Server-Timing: db;dur=: " + dbDuration + NEW_LINE +
                                 NEW_LINE +
                                 json
                             );
@@ -90,13 +95,17 @@ public class Server {
                                 }
                             }
 
+                            double dbStartTime = System.nanoTime();
                             setter.set(id, json);
+                            double dbEndTime = System.nanoTime();
+                            double dbDuration = ((dbEndTime - dbStartTime) / (double)1000000); // Milliseconds
 
                             pout.print(
                                 "HTTP/1.0 200 OK" + NEW_LINE +
                                 "Cache-Control: no-store, max-age=0" + NEW_LINE +
                                 "Content-Type: application/json; charset=utf-8" + NEW_LINE +
                                 "Content-length: 0" + NEW_LINE +
+                                "Server-Timing: db;dur=: " + dbDuration + NEW_LINE +
                                 NEW_LINE
                             );
                         } else {
