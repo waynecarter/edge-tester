@@ -76,7 +76,7 @@ public class Server {
                                 "Cache-Control: no-store, max-age=0" + NEW_LINE +
                                 "Content-Type: application/json; charset=utf-8" + NEW_LINE +
                                 "Content-length: " + (json != null ? json.length() : 0) + NEW_LINE +
-                                "Server-Timing: db;dur=: " + dbDuration + NEW_LINE +
+                                "Server-Timing: db;dur=" + dbDuration + NEW_LINE +
                                 NEW_LINE +
                                 json
                             );
@@ -105,7 +105,7 @@ public class Server {
                                 "Cache-Control: no-store, max-age=0" + NEW_LINE +
                                 "Content-Type: application/json; charset=utf-8" + NEW_LINE +
                                 "Content-length: 0" + NEW_LINE +
-                                "Server-Timing: db;dur=: " + dbDuration + NEW_LINE +
+                                "Server-Timing: db;dur=" + dbDuration + NEW_LINE +
                                 NEW_LINE
                             );
                         } else {
