@@ -180,7 +180,7 @@ class ViewController: UIViewController {
     private func log(target: String, requestType: String, result: RequestResult) {
         DispatchQueue.main.async {
             if self.out.text.count == 0 {
-                self.out.text.append("Target,RequestType,ResponseStatus,Start,Duration,DB Duration")
+                self.out.text.append("Target,Request Type,Response Status,Start,Duration,DB Duration")
             }
             
             self.out.text.append("\n\(target),\(requestType),\(result.status),\(result.start),\(result.duration),\(result.dbDuration)")
