@@ -154,7 +154,7 @@ class ViewController: UIViewController {
                         if let timingRange = serverTiming.range(of: "db;dur="),
                            let timingDuration = Double(serverTiming[timingRange.upperBound...])
                         {
-                            dbDuration = timingDuration
+                            dbDuration = timingDuration / Double(1000.0) // Seconds
                         }
                     }
                 }
