@@ -26,6 +26,8 @@ public class Server {
 
             while (true) {
                 Socket connection = socket.accept();
+                
+                double totalStartTime = System.nanoTime();
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 OutputStream out = new BufferedOutputStream(connection.getOutputStream());
@@ -34,14 +36,9 @@ public class Server {
                 try {
                     // Read first line of request
                     String request = in.readLine();
-                    if (request == null)
+                    if (request == null) {
+                        connection.close();
                         continue;
-
-                    // Ignore the rest
-                    while (true) {
-                        String ignore = in.readLine();
-                        if (ignore == null || ignore.length() == 0)
-                            break;
                     }
 
                     if (!request.startsWith("GET ") || !(request.endsWith(" HTTP/1.0") || request.endsWith(" HTTP/1.1"))) {
@@ -67,15 +64,15 @@ public class Server {
                             
                             double dbStartTime = System.nanoTime();
                             String json = getter.get(id);
-                            double dbEndTime = System.nanoTime();
-                            double dbDuration = ((dbEndTime - dbStartTime) / (double)1000000); // Milliseconds
+                            double dbDuration = ((System.nanoTime() - dbStartTime) / (double)1000000); // Milliseconds
+                            double totalDuration = ((System.nanoTime() - totalStartTime) / (double)1000000); // Milliseconds
                             
                             pout.print(
                                 "HTTP/1.0 200 OK" + NEW_LINE +
                                 "Cache-Control: no-store, max-age=0" + NEW_LINE +
                                 "Content-Type: application/json; charset=utf-8" + NEW_LINE +
                                 "Content-length: " + (json != null ? json.length() : 0) + NEW_LINE +
-                                "Server-Timing: db;dur=" + dbDuration + NEW_LINE +
+                                "Server-Timing: total;dur=" + totalDuration + ", db;dur=" + dbDuration + NEW_LINE +
                                 NEW_LINE +
                                 json
                             );
@@ -96,15 +93,15 @@ public class Server {
 
                             double dbStartTime = System.nanoTime();
                             setter.set(id, json);
-                            double dbEndTime = System.nanoTime();
-                            double dbDuration = ((dbEndTime - dbStartTime) / (double)1000000); // Milliseconds
+                            double dbDuration = ((System.nanoTime() - dbStartTime) / (double)1000000); // Milliseconds
+                            double totalDuration = ((System.nanoTime() - totalStartTime) / (double)1000000); // Milliseconds
 
                             pout.print(
                                 "HTTP/1.0 200 OK" + NEW_LINE +
                                 "Cache-Control: no-store, max-age=0" + NEW_LINE +
                                 "Content-Type: application/json; charset=utf-8" + NEW_LINE +
                                 "Content-length: 0" + NEW_LINE +
-                                "Server-Timing: db;dur=" + dbDuration + NEW_LINE +
+                                "Server-Timing: total;dur=" + totalDuration + ", db;dur=" + dbDuration + NEW_LINE +
                                 NEW_LINE
                             );
                         } else {
@@ -124,7 +121,8 @@ public class Server {
                     );
                 }
 
-                pout.close();
+                pout.flush();
+                connection.close();
             }
         } catch (Throwable t) {
             System.err.println("Could not start server: " + t);

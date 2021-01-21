@@ -17,6 +17,7 @@ class ViewController: UIViewController {
         let status: Int
         let start: Double
         let duration: Double
+        let serverDuration: Double
         let dbDuration: Double
     }
     
@@ -139,6 +140,7 @@ class ViewController: UIViewController {
         var statusCode: Int = 0
         var startTime: Double = 0
         var endTime: Double = 0
+        var serverDuration: Double = 0
         var dbDuration: Double = 0
         
         do {
@@ -151,7 +153,11 @@ class ViewController: UIViewController {
                 
                 if let serverTimings = response.value(forHTTPHeaderField: "Server-Timing")?.split(separator: ",") {
                     for serverTiming in serverTimings {
-                        if let timingRange = serverTiming.range(of: "db;dur="),
+                        if let timingRange = serverTiming.range(of: "total;dur="),
+                           let timingDuration = Double(serverTiming[timingRange.upperBound...])
+                        {
+                            serverDuration = timingDuration / Double(1000.0) // Seconds
+                        } else if let timingRange = serverTiming.range(of: "db;dur="),
                            let timingDuration = Double(serverTiming[timingRange.upperBound...])
                         {
                             dbDuration = timingDuration / Double(1000.0) // Seconds
@@ -167,6 +173,7 @@ class ViewController: UIViewController {
             status: statusCode,
             start: startTime,
             duration: endTime - startTime,
+            serverDuration: serverDuration,
             dbDuration: dbDuration
         )
     }
@@ -180,10 +187,10 @@ class ViewController: UIViewController {
     private func log(target: String, requestType: String, result: RequestResult) {
         DispatchQueue.main.async {
             if self.out.text.count == 0 {
-                self.out.text.append("Target,Request Type,Response Status,Start,Duration,DB Duration")
+                self.out.text.append("Target,Request Type,Response Status,Start,Duration,Server Duration,DB Duration")
             }
             
-            self.out.text.append("\n\(target),\(requestType),\(result.status),\(result.start),\(result.duration),\(result.dbDuration)")
+            self.out.text.append("\n\(target),\(requestType),\(result.status),\(result.start),\(result.duration),\(result.serverDuration),\(result.dbDuration)")
         }
     }
 }
