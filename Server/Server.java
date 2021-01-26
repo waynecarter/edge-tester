@@ -77,16 +77,13 @@ public class Server {
                     }
                 }
 
-                StringBuilder json = new StringBuilder();
-                try (Reader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), Charset.forName(StandardCharsets.UTF_8.name())))) {
-                    int c = 0;
-                    while ((c = reader.read()) != -1) {
-                        json.append((char) c);
-                    }
-                }
+                int contentLength = Integer.parseInt(exchange.getRequestHeaders().getFirst("Content-Length"));
+                byte[] body = new byte[contentLength];
+                exchange.getRequestBody().read(body);
+                String json = new String(body, Charset.forName(StandardCharsets.UTF_8.name()));
 
                 double dbStartTime = System.nanoTime();
-                setter.set(id, json.toString());
+                setter.set(id, json);
                 double dbDuration = ((System.nanoTime() - dbStartTime) / (double)1000000); // Milliseconds
                 double totalDuration = ((System.nanoTime() - totalStartTime) / (double)1000000); // Milliseconds
 
