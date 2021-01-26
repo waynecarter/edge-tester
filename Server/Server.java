@@ -70,17 +70,26 @@ public class Server {
                 String[] params = query != null ? query.split("\\&") : null;
 
                 String id = null;
+                String json = null;
                 for (String param : params) {
                     if (param.startsWith("id=")) {
                         id = URLDecoder.decode(param.substring(3), "UTF-8");
+                        // break;
+                    }
+
+                    if (param.startsWith("json=")) {
+                        json = URLDecoder.decode(param.substring(5), "UTF-8");
+                    }
+
+                    if (id != null && json != null) {
                         break;
                     }
                 }
 
-                int contentLength = Integer.parseInt(exchange.getRequestHeaders().getFirst("Content-Length"));
-                byte[] body = new byte[contentLength];
-                exchange.getRequestBody().read(body);
-                String json = new String(body, Charset.forName(StandardCharsets.UTF_8.name()));
+                // int contentLength = Integer.parseInt(exchange.getRequestHeaders().getFirst("Content-Length"));
+                // byte[] body = new byte[contentLength];
+                // exchange.getRequestBody().read(body);
+                // String json = new String(body, Charset.forName(StandardCharsets.UTF_8.name()));
 
                 double dbStartTime = System.nanoTime();
                 setter.set(id, json);

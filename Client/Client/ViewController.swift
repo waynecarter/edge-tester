@@ -63,7 +63,7 @@ class ViewController: UIViewController {
         
         for i in 1...testIterations {
             let data = string(withLength: payloadLength)
-            let body = "{\"data\":\"\(data)\"}"
+            let body = "%7B%22data%22:%22\(data)%22%7D"
 
             // AWS Zone
             
@@ -73,9 +73,9 @@ class ViewController: UIViewController {
                 result: makeRequest(
                     toURL: setUrlString(
                         withHost: awsZoneHost,
-                        iterationIndex: i
-                    ),
-                    withBody: body
+                        iterationIndex: i,
+                        body: body
+                    )
                 )
             )
             
@@ -98,9 +98,9 @@ class ViewController: UIViewController {
                 result: makeRequest(
                     toURL: setUrlString(
                         withHost: awsWavelengthZoneHost,
-                        iterationIndex: i
-                    ),
-                    withBody: body
+                        iterationIndex: i,
+                        body: body
+                    )
                 )
             )
 
@@ -128,18 +128,18 @@ class ViewController: UIViewController {
         return "http://\(host)/get?id=object\(iterationIndex)"
     }
     
-    private func setUrlString(withHost host: String, iterationIndex: Int) -> String {
-        return "http://\(host)/set?id=object\(iterationIndex)"
+    private func setUrlString(withHost host: String, iterationIndex: Int, body: String) -> String {
+        return "http://\(host)/set?id=object\(iterationIndex)&json=\(body)"
     }
     
-    private func makeRequest(toURL url: String, withBody body: String? = nil) -> RequestResult {
+    private func makeRequest(toURL url: String) -> RequestResult {
         var request = URLRequest(
             url: URL(string: url)!
         )
-        request.httpMethod = "POST"
-        if let body = body {
-            request.httpBody = body.data(using: .utf8)
-        }
+//        request.httpMethod = "POST"
+//        if let body = body {
+//            request.httpBody = body.data(using: .utf8)
+//        }
         
         var response: URLResponse?
         var statusCode: Int = 0
