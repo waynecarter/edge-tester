@@ -63,6 +63,7 @@ class ViewController: UIViewController {
         
         for i in 1...testIterations {
             let data = string(withLength: payloadLength)
+            let body = "{\"data\":\"\(data)\"}"
 
             // AWS Zone
             
@@ -70,11 +71,11 @@ class ViewController: UIViewController {
                 target: "AWS Zone",
                 requestType: "Set",
                 result: makeRequest(
-                    urlString: setUrlString(
+                    toURL: setUrlString(
                         withHost: awsZoneHost,
-                        iterationIndex: i,
-                        data: data
-                    )
+                        iterationIndex: i
+                    ),
+                    withBody: body
                 )
             )
             
@@ -82,7 +83,7 @@ class ViewController: UIViewController {
                 target: "AWS Zone",
                 requestType: "Get",
                 result: makeRequest(
-                    urlString: getUrlString(
+                    toURL: getUrlString(
                         withHost: awsZoneHost,
                         iterationIndex: i
                     )
@@ -95,11 +96,11 @@ class ViewController: UIViewController {
                 target: "AWS Wavelength Zone",
                 requestType: "Set",
                 result: makeRequest(
-                    urlString: setUrlString(
+                    toURL: setUrlString(
                         withHost: awsWavelengthZoneHost,
-                        iterationIndex: i,
-                        data: data
-                    )
+                        iterationIndex: i
+                    ),
+                    withBody: body
                 )
             )
 
@@ -107,7 +108,7 @@ class ViewController: UIViewController {
                 target: "AWS Wavelength Zone",
                 requestType: "Get",
                 result: makeRequest(
-                    urlString: getUrlString(
+                    toURL: getUrlString(
                         withHost: awsWavelengthZoneHost,
                         iterationIndex: i
                     )
@@ -127,14 +128,18 @@ class ViewController: UIViewController {
         return "http://\(host)/get?id=object\(iterationIndex)"
     }
     
-    private func setUrlString(withHost host: String, iterationIndex: Int, data: String) -> String {
-        return "http://\(host)/set?id=object\(iterationIndex)&json=%7B%22data%22:%22\(data)%22%7D"
+    private func setUrlString(withHost host: String, iterationIndex: Int) -> String {
+        return "http://\(host)/set?id=object\(iterationIndex)"
     }
     
-    private func makeRequest(urlString: String) -> RequestResult {
-        let request = URLRequest(
-            url: URL(string: urlString)!
+    private func makeRequest(toURL url: String, withBody body: String? = nil) -> RequestResult {
+        var request = URLRequest(
+            url: URL(string: url)!
         )
+        request.httpMethod = "POST"
+        if let body = body {
+            request.httpBody = body.data(using: .utf8)
+        }
         
         var response: URLResponse?
         var statusCode: Int = 0

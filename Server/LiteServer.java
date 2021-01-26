@@ -50,28 +50,5 @@ public class LiteServer {
                 }
             }
         );
-
-        // // Start services
-        // new Server().run(
-        //     new Server.Getter() {
-        //         public String get(String id) {
-        //             Document doc = db.getDocument(id);
-
-        //             if (doc != null) {
-        //                 return JSONUtils.json(doc.toMap());
-        //             }
-                    
-        //             return null;
-        //         }
-        //     }, new Server.Setter() {
-        //         public void set(String id, String json) {
-        //             try {
-        //                 db.save(new MutableDocument(id, JSONUtils.map(json)));
-        //             } catch (CouchbaseLiteException e) {
-        //                 throw new RuntimeException("Error saving document", e);
-        //             }
-        //         }
-        //     }
-        // );
     }
 }

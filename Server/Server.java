@@ -1,48 +1,44 @@
 import java.net.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.io.*;
 
 import com.sun.net.httpserver.*;
 
 public class Server {
-    private static final int PORT = 8080;
-
-    // private static final String NEW_LINE = "\r\n";
-
-    private HttpServer server = null;
+    private HttpServer _server = null;
 
     public interface Getter {
         // Request path format: http://localhost:8080/get?id=abc123
-        // Response body: JSON string
+        // Request body: null
+        // Response body: JSON Object
         String get(String id);
     }
 
     public interface Setter {
-        // Request path format:
-        // http://localhost:8080/set?id=abc123&json=%7B%22data%22:%22abcde12345%22%7D
+        // Request path format: http://localhost:8080/set?id=abc123
+        // Request body: JSON Object
         // Response body: null
         void set(String id, String json);
     }
 
     public Server(Getter getter, Setter setter) throws IOException {
-        if (server != null) {
-            server.stop(0);
+        if (_server != null) {
+            _server.stop(0);
         }
         
-        server = HttpServer.create(new InetSocketAddress(PORT), 0);
+        _server = HttpServer.create(new InetSocketAddress(8080), 0);
 
-        server.createContext("/get", new HttpHandler() {
-            public void handle(HttpExchange request) throws IOException {
+        _server.createContext("/get", new HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
                 double totalStartTime = System.nanoTime();
-                String query = request.getRequestURI().getQuery();
+                String query = exchange.getRequestURI().getQuery();
                 String[] params = query != null ? query.split("\\&") : null;
                 
                 String id = null;
                 for (String param : params) {
                     if (param.startsWith("id=")) {
                         id = URLDecoder.decode(param.substring(3), "UTF-8");
-                    }
-
-                    if (id != null) {
                         break;
                     }
                 }
@@ -51,187 +47,65 @@ public class Server {
                 String json = getter.get(id);
                 double dbDuration = ((System.nanoTime() - dbStartTime) / (double)1000000); // Milliseconds
                 double totalDuration = ((System.nanoTime() - totalStartTime) / (double)1000000); // Milliseconds
-                
-                Headers responseHeaders = request.getResponseHeaders();
-                responseHeaders.add("Cache-Control", "no-store, max-age=0");
-                responseHeaders.add("Content-Type", "application/json; charset=utf-8");
-                responseHeaders.add("Connection", "keep-alive");
-                responseHeaders.add("Server-Timing", "total;dur=" + totalDuration + ", db;dur=" + dbDuration);
+
+                _addResponseHeaders(exchange, totalDuration, dbDuration);
 
                 if (json == null) {
                     json = "";
                 }
 
-                request.sendResponseHeaders(200, json.length());
+                exchange.sendResponseHeaders(200, json.length());
 
-                OutputStream out = request.getResponseBody();
+                OutputStream out = exchange.getResponseBody();
                 out.write(json.getBytes());
 
-                request.close();
+                exchange.close();
             }
         });
 
-        server.createContext("/set", new HttpHandler() {
-            public void handle(HttpExchange request) throws IOException {
+        _server.createContext("/set", new HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
                 double totalStartTime = System.nanoTime();
-                String query = request.getRequestURI().getQuery();
+                String query = exchange.getRequestURI().getQuery();
                 String[] params = query != null ? query.split("\\&") : null;
 
                 String id = null;
-                String json = null;
                 for (String param : params) {
                     if (param.startsWith("id=")) {
                         id = URLDecoder.decode(param.substring(3), "UTF-8");
-                    } else if (param.startsWith("json=")) {
-                        json = URLDecoder.decode(param.substring(5), "UTF-8");
-                    }
-
-                    if (id != null && json != null) {
                         break;
                     }
                 }
 
+                StringBuilder json = new StringBuilder();
+                try (Reader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), Charset.forName(StandardCharsets.UTF_8.name())))) {
+                    int c = 0;
+                    while ((c = reader.read()) != -1) {
+                        json.append((char) c);
+                    }
+                }
+
                 double dbStartTime = System.nanoTime();
-                setter.set(id, json);
+                setter.set(id, json.toString());
                 double dbDuration = ((System.nanoTime() - dbStartTime) / (double)1000000); // Milliseconds
                 double totalDuration = ((System.nanoTime() - totalStartTime) / (double)1000000); // Milliseconds
 
-                Headers responseHeaders = request.getResponseHeaders();
-                responseHeaders.add("Cache-Control", "no-store, max-age=0");
-                responseHeaders.add("Content-Type", "application/json; charset=utf-8");
-                responseHeaders.add("Connection", "keep-alive");
-                responseHeaders.add("Server-Timing", "total;dur=" + totalDuration + ", db;dur=" + dbDuration);
+                _addResponseHeaders(exchange, totalDuration, dbDuration);
 
-                if (json == null) {
-                    json = "";
-                }
-
-                request.sendResponseHeaders(200, 0);
-                request.close();
+                exchange.sendResponseHeaders(200, 0);
+                exchange.close();
             }
         });
 
-        server.start();
+        _server.start();
     }
 
-    // public void run(Getter getter, Setter setter) {
-    //     ServerSocket socket = null;
-        
-    //     try {
-    //         socket = new ServerSocket(PORT);
+    private void _addResponseHeaders(HttpExchange exchange, double totalDuration, double dbDuration) {
+        Headers responseHeaders = exchange.getResponseHeaders();
 
-    //         while (true) {
-    //             Socket connection = socket.accept();
-                
-    //             double totalStartTime = System.nanoTime();
-
-    //             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-    //             OutputStream out = new BufferedOutputStream(connection.getOutputStream());
-    //             PrintStream pout = new PrintStream(out);
-
-    //             try {
-    //                 // Read first line of request
-    //                 String request = in.readLine();
-    //                 if (request == null) {
-    //                     connection.close();
-    //                     continue;
-    //                 }
-
-    //                 if (!request.startsWith("GET ") || !(request.endsWith(" HTTP/1.0") || request.endsWith(" HTTP/1.1"))) {
-    //                     pout.print(
-    //                         "HTTP/1.0 400 Bad Request" + NEW_LINE +
-    //                         NEW_LINE
-    //                     );
-    //                 } else {
-    //                     String path = request.substring(4, request.length()-9);
-    //                     String[] params = path.contains("?") ? path.split("\\?")[1].split("\\&") : null;
-
-    //                     if (path.startsWith("/get")) {
-    //                         String id = null;
-    //                         for (String param : params) {
-    //                             if (param.startsWith("id=")) {
-    //                                 id = URLDecoder.decode(param.substring(3), "UTF-8");
-    //                             }
-
-    //                             if (id != null) {
-    //                                 break;
-    //                             }
-    //                         }
-                            
-    //                         double dbStartTime = System.nanoTime();
-    //                         String json = getter.get(id);
-    //                         double dbDuration = ((System.nanoTime() - dbStartTime) / (double)1000000); // Milliseconds
-    //                         double totalDuration = ((System.nanoTime() - totalStartTime) / (double)1000000); // Milliseconds
-                            
-    //                         pout.print(
-    //                             "HTTP/1.0 200 OK" + NEW_LINE +
-    //                             "Cache-Control: no-store, max-age=0" + NEW_LINE +
-    //                             "Content-Type: application/json; charset=utf-8" + NEW_LINE +
-    //                             "Content-length: " + (json != null ? json.length() : 0) + NEW_LINE +
-    //                             "Server-Timing: total;dur=" + totalDuration + ", db;dur=" + dbDuration + NEW_LINE +
-    //                             NEW_LINE +
-    //                             json
-    //                         );
-    //                     } else if (path.startsWith("/set")) {
-    //                         String id = null;
-    //                         String json = null;
-    //                         for (String param : params) {
-    //                             if (param.startsWith("id=")) {
-    //                                 id = URLDecoder.decode(param.substring(3), "UTF-8");
-    //                             } else if (param.startsWith("json=")) {
-    //                                 json = URLDecoder.decode(param.substring(5), "UTF-8");
-    //                             }
-
-    //                             if (id != null && json != null) {
-    //                                 break;
-    //                             }
-    //                         }
-
-    //                         double dbStartTime = System.nanoTime();
-    //                         setter.set(id, json);
-    //                         double dbDuration = ((System.nanoTime() - dbStartTime) / (double)1000000); // Milliseconds
-    //                         double totalDuration = ((System.nanoTime() - totalStartTime) / (double)1000000); // Milliseconds
-
-    //                         pout.print(
-    //                             "HTTP/1.0 200 OK" + NEW_LINE +
-    //                             "Cache-Control: no-store, max-age=0" + NEW_LINE +
-    //                             "Content-Type: application/json; charset=utf-8" + NEW_LINE +
-    //                             "Content-length: 0" + NEW_LINE +
-    //                             "Server-Timing: total;dur=" + totalDuration + ", db;dur=" + dbDuration + NEW_LINE +
-    //                             NEW_LINE
-    //                         );
-    //                     } else {
-    //                         pout.print(
-    //                             "HTTP/1.0 400 Bad Request" + NEW_LINE +
-    //                             NEW_LINE
-    //                         );
-    //                     }
-    //                 }
-    //             } catch (Throwable t) {
-    //                 System.err.println("Error handling request: " + t);
-    //                 t.printStackTrace(System.err);
-
-    //                 pout.print(
-    //                     "HTTP/1.0 500 Internal Server Error" + NEW_LINE +
-    //                     NEW_LINE
-    //                 );
-    //             }
-
-    //             pout.flush();
-    //             connection.close();
-    //         }
-    //     } catch (Throwable t) {
-    //         System.err.println("Could not start server: " + t);
-    //         t.printStackTrace(System.err);
-    //     }
-
-    //     if (socket != null) {
-    //         try {
-    //             socket.close();
-    //         } catch (Throwable t) {
-    //             System.err.println("Could not stop server: " + t);
-    //             t.printStackTrace(System.err);
-    //         }
-    //     }
-    // }
+        responseHeaders.add("Cache-Control", "no-store, max-age=0");
+        responseHeaders.add("Content-Type", "application/json; charset=utf-8");
+        responseHeaders.add("Connection", "keep-alive");
+        responseHeaders.add("Server-Timing", "total;dur=" + totalDuration + ", db;dur=" + dbDuration);
+    }
 }
