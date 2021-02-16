@@ -11,7 +11,6 @@ class ViewController: UIViewController {
     @IBOutlet var out: UITextView!
     @IBOutlet var progressView: UIProgressView!
     @IBOutlet var startButton: UIBarButtonItem!
-    @IBOutlet var shareButton: UIBarButtonItem!
     
     struct RequestResult {
         let status: Int
@@ -47,73 +46,52 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBAction func share(_ sender: Any) {
-        let viewController = UIActivityViewController(activityItems: [ out.text ?? "" ], applicationActivities: nil)
-        viewController.popoverPresentationController?.sourceView = self.view
-
-        self.present(viewController, animated: true, completion: nil)
+    @IBAction func copyToClipboard(_ sender: Any) {
+        UIPasteboard.general.string = out.text
     }
     
     private func runTest() {
         let testIterations = 100
         let payloadLength = 1000
         
-        let awsZoneHost = "54.244.149.31:8080"
-        let awsWavelengthZoneHost = "155.146.22.181:8080"
+        struct Target {
+            let name: String
+            let host: String
+        }
+        
+        let targets: [Target] = [
+            Target(name: "AWS Zone", host: "54.244.149.31:8080"),
+            Target(name: "AWS Wavelength Zone", host: "155.146.22.181:8080")
+        ]
         
         for i in 1...testIterations {
             let data = string(withLength: payloadLength)
-            let body = "%7B%22data%22:%22\(data)%22%7D"
+            let json = "%7B%22data%22:%22\(data)%22%7D"
 
-            // AWS Zone
-            
-            log(
-                target: "AWS Zone",
-                requestType: "Set",
-                result: makeRequest(
-                    toURL: setUrlString(
-                        withHost: awsZoneHost,
-                        iterationIndex: i,
-                        body: body
+            for target in targets {
+                log(
+                    target: target.name,
+                    requestType: "Set",
+                    result: makeRequest(
+                        toURL: setUrlString(
+                            withHost: target.host,
+                            iterationIndex: i,
+                            json: json
+                        )
                     )
                 )
-            )
-            
-            log(
-                target: "AWS Zone",
-                requestType: "Get",
-                result: makeRequest(
-                    toURL: getUrlString(
-                        withHost: awsZoneHost,
-                        iterationIndex: i
+                
+                log(
+                    target: target.name,
+                    requestType: "Get",
+                    result: makeRequest(
+                        toURL: getUrlString(
+                            withHost: target.host,
+                            iterationIndex: i
+                        )
                     )
                 )
-            )
-            
-            // AWS Wavelength
-
-            log(
-                target: "AWS Wavelength Zone",
-                requestType: "Set",
-                result: makeRequest(
-                    toURL: setUrlString(
-                        withHost: awsWavelengthZoneHost,
-                        iterationIndex: i,
-                        body: body
-                    )
-                )
-            )
-
-            log(
-                target: "AWS Wavelength Zone",
-                requestType: "Get",
-                result: makeRequest(
-                    toURL: getUrlString(
-                        withHost: awsWavelengthZoneHost,
-                        iterationIndex: i
-                    )
-                )
-            )
+            }
             
             DispatchQueue.main.sync {
                 progressView.progress = Float(i) / Float(testIterations)
@@ -128,18 +106,19 @@ class ViewController: UIViewController {
         return "http://\(host)/get?id=object\(iterationIndex)"
     }
     
-    private func setUrlString(withHost host: String, iterationIndex: Int, body: String) -> String {
-        return "http://\(host)/set?id=object\(iterationIndex)&json=\(body)"
+    private func setUrlString(withHost host: String, iterationIndex: Int, json: String) -> String {
+        return "http://\(host)/set?id=object\(iterationIndex)&json=\(json)"
     }
     
-    private func makeRequest(toURL url: String) -> RequestResult {
+    private func makeRequest(toURL url: String, withBody body: String? = nil) -> RequestResult {
         var request = URLRequest(
             url: URL(string: url)!
         )
-//        request.httpMethod = "POST"
-//        if let body = body {
-//            request.httpBody = body.data(using: .utf8)
-//        }
+        
+        if let body = body {
+            request.httpMethod = "POST"
+            request.httpBody = body.data(using: .utf8)
+        }
         
         var response: URLResponse?
         var statusCode: Int = 0
@@ -199,4 +178,3 @@ class ViewController: UIViewController {
         }
     }
 }
-

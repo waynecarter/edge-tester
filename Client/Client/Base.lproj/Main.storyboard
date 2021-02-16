@@ -30,9 +30,9 @@
                                 <rect key="frame" x="0.0" y="813" width="414" height="49"/>
                                 <items>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="lJB-sp-Ebt"/>
-                                    <barButtonItem systemItem="action" id="FqR-lZ-lxO">
+                                    <barButtonItem image="doc.on.clipboard" catalog="system" id="FqR-lZ-lxO">
                                         <connections>
-                                            <action selector="share:" destination="BYZ-38-t0r" id="H3l-vD-VLE"/>
+                                            <action selector="copyToClipboard:" destination="BYZ-38-t0r" id="H3l-vD-VLE"/>
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="QCQ-mw-U4G"/>
@@ -63,7 +63,6 @@
                     <connections>
                         <outlet property="out" destination="6oh-4U-kJQ" id="i6z-gm-fif"/>
                         <outlet property="progressView" destination="WLX-FH-OKR" id="BWe-CX-FXO"/>
-                        <outlet property="shareButton" destination="FqR-lZ-lxO" id="DrA-pV-kZX"/>
                         <outlet property="startButton" destination="iFu-dc-mXe" id="wNO-rD-GmE"/>
                     </connections>
                 </viewController>
@@ -73,6 +72,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="doc.on.clipboard" catalog="system" width="116" height="128"/>
         <systemColor name="labelColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
