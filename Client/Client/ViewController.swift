@@ -60,8 +60,8 @@ class ViewController: UIViewController {
         }
         
         let targets: [Target] = [
-            Target(name: "AWS Zone", host: "54.244.149.31:8080"),
-            Target(name: "AWS Wavelength Zone", host: "155.146.22.181:8080")
+            Target(name: "AWS Zone", host: "54.191.119.94:8080"),
+            Target(name: "AWS Local Zone", host: "15.254.2.208:8080")
         ]
         
         for i in 1...testIterations {
