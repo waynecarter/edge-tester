@@ -1,6 +1,4 @@
 import java.net.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.io.*;
 
 import com.sun.net.httpserver.*;
@@ -16,8 +14,8 @@ public class Server {
     }
 
     public interface Setter {
-        // Request path format: http://localhost:8080/set?id=abc123
-        // Request body: JSON Object
+        // Request path format: http://localhost:8080/set?id=abc123&json=%7B%22data%22:%22abcde12345%22%7D
+        // Request body: null
         // Response body: null
         void set(String id, String json);
     }
