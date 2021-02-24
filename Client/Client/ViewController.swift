@@ -150,7 +150,7 @@ class ViewController: UIViewController {
                 }
             }
         } catch {
-            // Do nothing
+            print(error.localizedDescription)
         }
         
         return RequestResult(

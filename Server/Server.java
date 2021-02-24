@@ -98,7 +98,7 @@ public class Server {
 
                 _addResponseHeaders(exchange, totalDuration, dbDuration);
 
-                exchange.sendResponseHeaders(200, 0);
+                exchange.sendResponseHeaders(200, -1);
                 exchange.close();
             }
         });
