@@ -127,30 +127,27 @@ class ViewController: UIViewController {
         var serverDuration: Double = 0
         var dbDuration: Double = 0
         
-        do {
-            startTime = Date().timeIntervalSince1970
-            try NSURLConnection.sendSynchronousRequest(request, returning: &response)
-            endTime = Date().timeIntervalSince1970
+        startTime = Date().timeIntervalSince1970
+        let taskResult = URLSession.shared.synchronousDataTask(with: request)
+        response = taskResult.response
+        endTime = Date().timeIntervalSince1970
+        
+        if let response = response as? HTTPURLResponse {
+            statusCode = response.statusCode
             
-            if let response = response as? HTTPURLResponse {
-                statusCode = response.statusCode
-                
-                if let serverTimings = response.value(forHTTPHeaderField: "Server-Timing")?.split(separator: ",") {
-                    for serverTiming in serverTimings {
-                        if let timingRange = serverTiming.range(of: "total;dur="),
-                           let timingDuration = Double(serverTiming[timingRange.upperBound...])
-                        {
-                            serverDuration = timingDuration / Double(1000.0) // Seconds
-                        } else if let timingRange = serverTiming.range(of: "db;dur="),
-                           let timingDuration = Double(serverTiming[timingRange.upperBound...])
-                        {
-                            dbDuration = timingDuration / Double(1000.0) // Seconds
-                        }
+            if let serverTimings = response.value(forHTTPHeaderField: "Server-Timing")?.split(separator: ",") {
+                for serverTiming in serverTimings {
+                    if let timingRange = serverTiming.range(of: "total;dur="),
+                       let timingDuration = Double(serverTiming[timingRange.upperBound...])
+                    {
+                        serverDuration = timingDuration / Double(1000.0) // Seconds
+                    } else if let timingRange = serverTiming.range(of: "db;dur="),
+                       let timingDuration = Double(serverTiming[timingRange.upperBound...])
+                    {
+                        dbDuration = timingDuration / Double(1000.0) // Seconds
                     }
                 }
             }
-        } catch {
-            print(error.localizedDescription)
         }
         
         return RequestResult(
