@@ -10,6 +10,7 @@ import UIKit
 class ViewController: UIViewController {
     @IBOutlet var out: UITextView!
     @IBOutlet var progressView: UIProgressView!
+    @IBOutlet var settingsButton: UIBarButtonItem!
     @IBOutlet var startButton: UIBarButtonItem!
     
     struct RequestResult {
@@ -29,6 +30,7 @@ class ViewController: UIViewController {
         DispatchQueue.global(qos: .background).async {
             DispatchQueue.main.sync {
                 self.startButton.isEnabled = false
+                self.settingsButton.isEnabled = false
                 self.out.text = nil
                 self.progressView.progress = 0
             }
@@ -42,7 +44,16 @@ class ViewController: UIViewController {
                 
                 self.progressView.progress = 0
                 self.startButton.isEnabled = true
+                self.settingsButton.isEnabled = true
             }
+        }
+    }
+    
+    @IBAction func openSettings(_ sender: Any) {
+        if let settingsUrl = URL(string: UIApplication.openSettingsURLString),
+           UIApplication.shared.canOpenURL(settingsUrl)
+        {
+            UIApplication.shared.open(settingsUrl)
         }
     }
     
@@ -59,9 +70,33 @@ class ViewController: UIViewController {
             let host: String
         }
         
+        let cloudTargetName = Settings.cloudTargetName // e.g. "AWS Zone"
+        let cloudTargetHost = Settings.cloudTargetHost // e.g. "34.218.247.30:8080"
+        let edgeTargetName = Settings.edgeTargetName   // e.g. "AWS Wavelength Zone"
+        let edgeTargetHost = Settings.edgeTargetHost   // e.g. "155.146.22.181:8080"
+        
+        guard cloudTargetName != nil, cloudTargetHost != nil, edgeTargetName != nil, edgeTargetHost != nil else {
+            DispatchQueue.main.sync {
+                let alert = UIAlertController(title: "Settings", message: "Cloud and edge target information must be defined in Settings.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+                
+                if let settingsUrl = URL(string: UIApplication.openSettingsURLString),
+                   UIApplication.shared.canOpenURL(settingsUrl)
+                {
+                    alert.addAction(UIAlertAction(title: "Settings", style: .default, handler: { action in
+                        self.openSettings(action)
+                    }))
+                }
+                
+                present(alert, animated: true)
+            }
+            
+            return
+        }
+        
         let targets: [Target] = [
-            Target(name: "AWS Zone", host: "34.218.247.30:8080"),
-            Target(name: "AWS Wavelength Zone", host: "155.146.22.181:8080")
+            Target(name: cloudTargetName!, host: cloudTargetHost!),
+            Target(name: edgeTargetName!, host: edgeTargetHost!)
         ]
         
         for i in 1...testIterations {
