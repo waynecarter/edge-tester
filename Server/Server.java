@@ -1,4 +1,5 @@
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.io.*;
 
 import com.sun.net.httpserver.*;
@@ -36,7 +37,7 @@ public class Server {
                 String id = null;
                 for (String param : params) {
                     if (param.startsWith("id=")) {
-                        id = URLDecoder.decode(param.substring(3), "UTF-8");
+                        id = URLDecoder.decode(param.substring(3), StandardCharsets.UTF_8.name());
                         break;
                     }
                 }
@@ -71,12 +72,12 @@ public class Server {
                 String json = null;
                 for (String param : params) {
                     if (param.startsWith("id=")) {
-                        id = URLDecoder.decode(param.substring(3), "UTF-8");
+                        id = URLDecoder.decode(param.substring(3), StandardCharsets.UTF_8.name());
                         // break;
                     }
 
                     if (param.startsWith("json=")) {
-                        json = URLDecoder.decode(param.substring(5), "UTF-8");
+                        json = URLDecoder.decode(param.substring(5), StandardCharsets.UTF_8.name());
                     }
 
                     if (id != null && json != null) {
@@ -84,10 +85,13 @@ public class Server {
                     }
                 }
 
-                // int contentLength = Integer.parseInt(exchange.getRequestHeaders().getFirst("Content-Length"));
-                // byte[] body = new byte[contentLength];
-                // exchange.getRequestBody().read(body);
-                // String json = new String(body, Charset.forName(StandardCharsets.UTF_8.name()));
+                if (json == null && "POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    int contentLength = Integer.parseInt(exchange.getRequestHeaders().getFirst("Content-Length"));
+                    byte[] body = new byte[contentLength];
+                    exchange.getRequestBody().read(body);
+                    
+                    json = URLDecoder.decode(new String(body, StandardCharsets.UTF_8), StandardCharsets.UTF_8.name());
+                }
 
                 double dbStartTime = System.nanoTime();
                 setter.set(id, json);

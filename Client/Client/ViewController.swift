@@ -13,14 +13,6 @@ class ViewController: UIViewController {
     @IBOutlet var settingsButton: UIBarButtonItem!
     @IBOutlet var startButton: UIBarButtonItem!
     
-    struct RequestResult {
-        let status: Int
-        let start: Double
-        let duration: Double
-        let serverDuration: Double
-        let dbDuration: Double
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -104,28 +96,40 @@ class ViewController: UIViewController {
             let json = "%7B%22data%22:%22\(data)%22%7D"
 
             for target in targets {
-                log(
-                    target: target.name,
-                    requestType: "Set",
-                    result: makeRequest(
-                        toURL: setUrlString(
-                            withHost: target.host,
-                            iterationIndex: i,
-                            json: json
+                let setResult: RequestResult = {
+                    if Settings.usePostForSetOperations {
+                        return makeRequest(
+                            toURL: setUrlString(
+                                withHost: target.host,
+                                iterationIndex: i
+                            ),
+                            withBody: json
                         )
+                    } else {
+                        return makeRequest(
+                            toURL: setUrlString(
+                                withHost: target.host,
+                                iterationIndex: i,
+                                json: json
+                            )
+                        )
+                    }
+                }()
+                log(target: target.name, requestType: "Set", result: setResult)
+
+                let getResult = makeRequest(
+                    toURL: getUrlString(
+                        withHost: target.host,
+                        iterationIndex: i
                     )
                 )
-                
-                log(
-                    target: target.name,
-                    requestType: "Get",
-                    result: makeRequest(
-                        toURL: getUrlString(
-                            withHost: target.host,
-                            iterationIndex: i
-                        )
-                    )
-                )
+                log(target: target.name, requestType: "Get", result: getResult)
+
+                let setString = json.removingPercentEncoding
+                let getString = String(data: getResult.data!, encoding: String.Encoding.utf8)!
+                if setString != getString {
+                    print("Error: GET response is not equal to the value SET.")
+                }
             }
             
             DispatchQueue.main.sync {
@@ -139,6 +143,10 @@ class ViewController: UIViewController {
     
     private func getUrlString(withHost host: String, iterationIndex: Int) -> String {
         return "http://\(host)/get?id=object\(iterationIndex)"
+    }
+    
+    private func setUrlString(withHost host: String, iterationIndex: Int) -> String {
+        return "http://\(host)/set?id=object\(iterationIndex)"
     }
     
     private func setUrlString(withHost host: String, iterationIndex: Int, json: String) -> String {
@@ -186,12 +194,22 @@ class ViewController: UIViewController {
         }
         
         return RequestResult(
+            data: taskResult.data,
             status: statusCode,
             start: startTime,
             duration: endTime - startTime,
             serverDuration: serverDuration,
             dbDuration: dbDuration
         )
+    }
+    
+    struct RequestResult {
+        let data: Data?
+        let status: Int
+        let start: Double
+        let duration: Double
+        let serverDuration: Double
+        let dbDuration: Double
     }
     
     private func string(withLength length: Int) -> String {
