@@ -91,6 +91,11 @@ class ViewController: UIViewController {
             Target(name: edgeTargetName!, host: edgeTargetHost!)
         ]
         
+        // Log Couchbase copyright and data headers
+        let year = Calendar.current.dateComponents([.year], from: Date()).year!
+        log("Copyright (c) \(year) Couchbase, Inc All rights reserved.")
+        log("Target,Request Type,Response Status,Start,Duration,Server Duration,DB Duration")
+        
         for i in 1...testIterations {
             let data = string(withLength: payloadLength)
             let json = "%7B%22data%22:%22\(data)%22%7D"
@@ -126,9 +131,9 @@ class ViewController: UIViewController {
                 log(target: target.name, requestType: "Get", result: getResult)
 
                 let setString = json.removingPercentEncoding
-                let getString = String(data: getResult.data!, encoding: String.Encoding.utf8)!
+                let getString = String(data: getResult.data ?? Data(), encoding: String.Encoding.utf8)
                 if setString != getString {
-                    print("Error: GET response is not equal to the value SET.")
+                    log("Error: GET response is not equal to the value SET.")
                 }
             }
             
@@ -219,12 +224,15 @@ class ViewController: UIViewController {
     }
 
     private func log(target: String, requestType: String, result: RequestResult) {
-        DispatchQueue.main.async {
-            if self.out.text.count == 0 {
-                self.out.text.append("Target,Request Type,Response Status,Start,Duration,Server Duration,DB Duration")
+        log("\(target),\(requestType),\(result.status),\(result.start),\(result.duration),\(result.serverDuration),\(result.dbDuration)")
+    }
+    
+    private func log(_ string: String) {
+        DispatchQueue.main.sync {
+            if self.out.text.count > 0 {
+                self.out.text.append("\n")
             }
-            
-            self.out.text.append("\n\(target),\(requestType),\(result.status),\(result.start),\(result.duration),\(result.serverDuration),\(result.dbDuration)")
+            self.out.text.append("\(string)")
         }
     }
 }
