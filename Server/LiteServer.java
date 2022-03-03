@@ -59,7 +59,7 @@ public class LiteServer {
                         int year = calendar.get(Calendar.YEAR);
 
                         MutableDocument doc = new MutableDocument("results");
-                        doc.setString("copyright", "Copyright (c) " + year + " Couchbase, Inc All rights reserved.");
+                        doc.setString("copyright", "Copyright (c) " + year + " Couchbase, Inc. All rights reserved.");
                         doc.setDate("date", new Date());
                         doc.setString("results", results);
 
