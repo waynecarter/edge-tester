@@ -8,7 +8,7 @@
 import UIKit
 
 class ViewController: UIViewController {
-    @IBOutlet var out: UITextView!
+    private var out = String()
     @IBOutlet var progressView: UIProgressView!
     @IBOutlet var settingsButton: UIBarButtonItem!
     @IBOutlet var startButton: UIBarButtonItem!
@@ -23,7 +23,7 @@ class ViewController: UIViewController {
             DispatchQueue.main.sync {
                 self.startButton.isEnabled = false
                 self.settingsButton.isEnabled = false
-                self.out.text = nil
+                self.out.removeAll()
                 self.progressView.progress = 0
             }
             
@@ -49,14 +49,7 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBAction func copyToClipboard(_ sender: Any) {
-        UIPasteboard.general.string = out.text
-    }
-    
     private func runTest() {
-        let testIterations = 100
-        let payloadLength = 1000
-        
         struct Target {
             let name: String
             let host: String
@@ -91,13 +84,13 @@ class ViewController: UIViewController {
             Target(name: edgeTargetName!, host: edgeTargetHost!)
         ]
         
-        // Log Couchbase copyright and data headers
-        let year = Calendar.current.dateComponents([.year], from: Date()).year!
-        log("Copyright (c) \(year) Couchbase, Inc All rights reserved.")
-        log("Target,Request Type,Response Status,Start,Duration,Server Duration,DB Duration")
+        logHeaders()
         
+        // Run tests
+        let testIterations = Settings.testIterations
+        let payloadSize = Settings.payloadSize
         for i in 1...testIterations {
-            let data = string(withLength: payloadLength)
+            let data = string(withLength: payloadSize)
             let json = "%7B%22data%22:%22\(data)%22%7D"
 
             for target in targets {
@@ -133,7 +126,7 @@ class ViewController: UIViewController {
                 let setString = json.removingPercentEncoding
                 let getString = String(data: getResult.data ?? Data(), encoding: String.Encoding.utf8)
                 if setString != getString {
-                    log("Error: GET response is not equal to the value SET.")
+                    log("Error: Get value is not equal to the value Set.")
                 }
             }
             
@@ -143,6 +136,14 @@ class ViewController: UIViewController {
             
             // Sleep 1 second
             sleep(1)
+        }
+        
+        // Post results
+        for target in targets {
+            _ = makeRequest(
+                toURL: "http://\(target.host)/results",
+                withBody: out
+            )
         }
     }
     
@@ -165,6 +166,7 @@ class ViewController: UIViewController {
         
         if let body = body {
             request.httpMethod = "POST"
+            request.setValue("\(body.lengthOfBytes(using: .utf8))", forHTTPHeaderField: "Content-Length")
             request.httpBody = body.data(using: .utf8)
         }
         
@@ -222,17 +224,19 @@ class ViewController: UIViewController {
 
         return String((0..<length).map{ _ in letters.randomElement()! })
     }
+    
+    private func logHeaders() {
+        log("Target,Request Type,Response Status,Start,Duration,Server Duration,DB Duration")
+    }
 
     private func log(target: String, requestType: String, result: RequestResult) {
         log("\(target),\(requestType),\(result.status),\(result.start),\(result.duration),\(result.serverDuration),\(result.dbDuration)")
     }
     
     private func log(_ string: String) {
-        DispatchQueue.main.sync {
-            if self.out.text.count > 0 {
-                self.out.text.append("\n")
-            }
-            self.out.text.append("\(string)")
+        if out.count > 0 {
+            out += "\n"
         }
+        out += string
     }
 }

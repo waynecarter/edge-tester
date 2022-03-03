@@ -1,4 +1,6 @@
 import java.net.URI;
+import java.util.Calendar;
+import java.util.Date;
 
 import com.couchbase.lite.*;
 
@@ -47,6 +49,36 @@ public class LiteServer {
                     } catch (CouchbaseLiteException e) {
                         throw new RuntimeException("Error saving document", e);
                     }
+                }
+            }, new Server.Results() {
+                public void set(String results) {
+                    try {
+                        Date date = new Date();
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTime(date);
+                        int year = calendar.get(Calendar.YEAR);
+
+                        MutableDocument doc = new MutableDocument("results");
+                        doc.setString("copyright", "Copyright (c) " + year + " Couchbase, Inc All rights reserved.");
+                        doc.setDate("date", new Date());
+                        doc.setString("results", results);
+
+                        db.save(doc);
+                    } catch (CouchbaseLiteException e) {
+                        throw new RuntimeException("Error saving results", e);
+                    }
+                }
+
+                public String get() {
+                    Document doc = db.getDocument("results");
+
+                    if (doc != null) {
+                        return doc.getString("copyright").toString() + "\n" +
+                               doc.getDate("date").toString() + "\n\n" +
+                               doc.getString("results");
+                    }
+                    
+                    return null;
                 }
             }
         );

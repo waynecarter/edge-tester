@@ -8,6 +8,9 @@
 import Foundation
 
 class Settings {
+    static let testIterations: Int = 100
+    static let payloadSize = 1000
+    
     static var cloudTargetName: String? {
         trimmed(UserDefaults.standard.string(forKey: "cloud_target_name"))
     }
