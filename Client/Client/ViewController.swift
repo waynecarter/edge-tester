@@ -9,7 +9,9 @@ import UIKit
 
 class ViewController: UIViewController {
     private var out = String()
-    @IBOutlet var progressView: UIProgressView!
+    @IBOutlet var pingProgressView: UIProgressView! = UIProgressView()
+    @IBOutlet var traceRouteProgressView: UIProgressView! = UIProgressView()
+    @IBOutlet var testProgressView: UIProgressView!
     @IBOutlet var settingsButton: UIBarButtonItem!
     @IBOutlet var startButton: UIBarButtonItem!
     
@@ -24,7 +26,9 @@ class ViewController: UIViewController {
                 self.startButton.isEnabled = false
                 self.settingsButton.isEnabled = false
                 self.out.removeAll()
-                self.progressView.progress = 0
+                self.pingProgressView.progress = 0
+                self.traceRouteProgressView.progress = 0
+                self.testProgressView.progress = 0
             }
             
             self.runTest()
@@ -34,7 +38,7 @@ class ViewController: UIViewController {
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                 self.present(alert, animated: true)
                 
-                self.progressView.progress = 0
+                self.testProgressView.progress = 0
                 self.startButton.isEnabled = true
                 self.settingsButton.isEnabled = true
             }
@@ -56,9 +60,9 @@ class ViewController: UIViewController {
         }
         
         let cloudTargetName = Settings.cloudTargetName // e.g. "AWS Zone"
-        let cloudTargetHost = Settings.cloudTargetHost // e.g. "34.218.247.30:8080"
+        let cloudTargetHost = Settings.cloudTargetHost // e.g. "34.218.247.30"
         let edgeTargetName = Settings.edgeTargetName   // e.g. "AWS Wavelength Zone"
-        let edgeTargetHost = Settings.edgeTargetHost   // e.g. "155.146.22.181:8080"
+        let edgeTargetHost = Settings.edgeTargetHost   // e.g. "155.146.22.181"
         
         guard cloudTargetName != nil, cloudTargetHost != nil, edgeTargetName != nil, edgeTargetHost != nil else {
             DispatchQueue.main.sync {
@@ -84,9 +88,30 @@ class ViewController: UIViewController {
             Target(name: edgeTargetName!, host: edgeTargetHost!)
         ]
         
-        logHeaders()
+        // Run Ping
+        for i in 0..<targets.count {
+            let target = targets[i]
+            
+            // TODO: Ping target and log results
+            
+            DispatchQueue.main.sync {
+                pingProgressView.progress = Float(i+1) / Float(targets.count)
+            }
+        }
+        
+        // Run TraceRoute
+        for i in 0..<targets.count {
+            let target = targets[i]
+            
+            // TODO: TraceRoute target and log
+            
+            DispatchQueue.main.sync {
+                traceRouteProgressView.progress = Float(i+1) / Float(targets.count)
+            }
+        }
         
         // Run tests
+        logHeaders()
         let testIterations = Settings.testIterations
         let payloadSize = Settings.payloadSize
         for i in 1...testIterations {
@@ -131,7 +156,7 @@ class ViewController: UIViewController {
             }
             
             DispatchQueue.main.sync {
-                progressView.progress = Float(i) / Float(testIterations)
+                testProgressView.progress = Float(i) / Float(testIterations)
             }
             
             // Sleep 1 second
@@ -141,22 +166,26 @@ class ViewController: UIViewController {
         // Post results
         for target in targets {
             _ = makeRequest(
-                toURL: "http://\(target.host)/results",
+                toURL: resultsUrlString(withHost: target.host),
                 withBody: out
             )
         }
     }
     
     private func getUrlString(withHost host: String, iterationIndex: Int) -> String {
-        return "http://\(host)/get?id=object\(iterationIndex)"
+        return "http://\(host):8080/get?id=object\(iterationIndex)"
     }
     
     private func setUrlString(withHost host: String, iterationIndex: Int) -> String {
-        return "http://\(host)/set?id=object\(iterationIndex)"
+        return "http://\(host):8080/set?id=object\(iterationIndex)"
     }
     
     private func setUrlString(withHost host: String, iterationIndex: Int, json: String) -> String {
-        return "http://\(host)/set?id=object\(iterationIndex)&json=\(json)"
+        return "http://\(host):8080/set?id=object\(iterationIndex)&json=\(json)"
+    }
+    
+    private func resultsUrlString(withHost host: String) -> String {
+        return "http://\(host):8080/results"
     }
     
     private func makeRequest(toURL url: String, withBody body: String? = nil) -> RequestResult {
