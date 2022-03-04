@@ -9,8 +9,8 @@ import UIKit
 
 class ViewController: UIViewController {
     private var out = String()
-    @IBOutlet var pingProgressView: UIProgressView! = UIProgressView()
-    @IBOutlet var traceRouteProgressView: UIProgressView! = UIProgressView()
+    @IBOutlet var pingProgressView: UIProgressView!
+    @IBOutlet var traceRouteProgressView: UIProgressView!
     @IBOutlet var testProgressView: UIProgressView!
     @IBOutlet var settingsButton: UIBarButtonItem!
     @IBOutlet var startButton: UIBarButtonItem!
