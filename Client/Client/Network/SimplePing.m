@@ -12,6 +12,10 @@
 #include <netinet/in.h>
 #include <errno.h>
 
+# pragma mark constant
+
+NSUInteger const kSimplePingDefaultDataSize = 56;
+
 #pragma mark * IPv4 and ICMPv4 On-The-Wire Format
 
 /*! Describes the on-the-wire header format for an IPv4 packet.
@@ -249,7 +253,7 @@ static uint16_t in_cksum(const void *buffer, size_t bufferLen) {
         // Our dummy payload is sized so that the resulting ICMP packet, including the ICMPHeader, is 
         // 64-bytes, which makes it easier to recognise our packets on the wire.
         
-        assert([payload length] == 56);
+        assert([payload length] == kSimplePingDefaultDataSize);
     }
     
     switch (self.hostAddressFamily) {
@@ -359,6 +363,19 @@ static uint16_t in_cksum(const void *buffer, size_t bufferLen) {
         }
     }
     return result;
+}
+
++ (NSString *)addressInIPv4Packet:(NSData *)packet {
+    const struct IPv4Header *ipPtr;
+    if (packet.length >= (sizeof(IPv4Header) + sizeof(ICMPHeader))) {
+        ipPtr = (const IPv4Header *) packet.bytes;
+        return [NSString stringWithFormat:@"%d.%d.%d.%d",
+                ipPtr->sourceAddress[0],
+                ipPtr->sourceAddress[1],
+                ipPtr->sourceAddress[2],
+                ipPtr->sourceAddress[3]];
+    }
+    return nil;
 }
 
 /*! Checks whether the specified sequence number is one we sent.

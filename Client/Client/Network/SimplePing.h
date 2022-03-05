@@ -37,6 +37,8 @@ typedef NS_ENUM(NSInteger, SimplePingAddressStyle) {
 
 @interface SimplePing : NSObject
 
+extern NSUInteger const kSimplePingDefaultDataSize;
+
 - (instancetype)init NS_UNAVAILABLE;
 
 /*! Initialise the object to ping the specified host.
@@ -125,6 +127,8 @@ typedef NS_ENUM(NSInteger, SimplePingAddressStyle) {
 - (void)sendPingWithData:(nullable NSData *)data;
 
 - (void)sendTraceRouteWithTTL:(int)ttl numMessages:(int)numMesgs;
+
++ (NSString *)addressInIPv4Packet:(NSData *)packet;
 
 /*! Stops the object.
  *  \details You should call this when you're done pinging.
