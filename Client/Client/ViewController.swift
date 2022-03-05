@@ -38,6 +38,8 @@ class ViewController: UIViewController {
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                 self.present(alert, animated: true)
                 
+                self.pingProgressView.progress = 0
+                self.traceRouteProgressView.progress = 0
                 self.testProgressView.progress = 0
                 self.startButton.isEnabled = true
                 self.settingsButton.isEnabled = true
@@ -90,8 +92,7 @@ class ViewController: UIViewController {
         
         // Run Ping
         for i in 0..<targets.count {
-            let target = targets[i]
-            
+            // let target = targets[i]
             // TODO: Ping target and log results
             
             DispatchQueue.main.sync {
@@ -102,9 +103,11 @@ class ViewController: UIViewController {
         // Run TraceRoute
         for i in 0..<targets.count {
             let target = targets[i]
-            
-            // TODO: TraceRoute target and log
-            
+            let trace = TraceRoute(host: target.host) { trace in
+                self.log(trace)
+            }
+            trace.start()
+            log("")
             DispatchQueue.main.sync {
                 traceRouteProgressView.progress = Float(i+1) / Float(targets.count)
             }

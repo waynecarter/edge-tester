@@ -16,6 +16,8 @@
 		A3F15FB025AE6090007770B1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3F15FAE25AE6090007770B1 /* Main.storyboard */; };
 		A3F15FB225AE6092007770B1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A3F15FB125AE6092007770B1 /* Assets.xcassets */; };
 		A3F15FB525AE6092007770B1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3F15FB325AE6092007770B1 /* LaunchScreen.storyboard */; };
+		FC19CFE127D2F56400F0BDAC /* SimplePing.m in Sources */ = {isa = PBXBuildFile; fileRef = FC19CFDF27D2F56400F0BDAC /* SimplePing.m */; };
+		FC19CFE327D2F5BB00F0BDAC /* TraceRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC19CFE227D2F5BB00F0BDAC /* TraceRoute.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +33,10 @@
 		A3F15FB125AE6092007770B1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A3F15FB425AE6092007770B1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A3F15FB625AE6092007770B1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FC19CFDA27D2F56300F0BDAC /* Client-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Client-Bridging-Header.h"; sourceTree = "<group>"; };
+		FC19CFDE27D2F56400F0BDAC /* SimplePing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimplePing.h; sourceTree = "<group>"; };
+		FC19CFDF27D2F56400F0BDAC /* SimplePing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SimplePing.m; sourceTree = "<group>"; };
+		FC19CFE227D2F5BB00F0BDAC /* TraceRoute.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TraceRoute.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +69,7 @@
 		A3F15FA725AE6090007770B1 /* Client */ = {
 			isa = PBXGroup;
 			children = (
+				FC19CFDD27D2F56400F0BDAC /* Network */,
 				A3204DD725DC60550007E2DF /* Client.entitlements */,
 				A3F15FAE25AE6090007770B1 /* Main.storyboard */,
 				A3F15FB325AE6092007770B1 /* LaunchScreen.storyboard */,
@@ -74,8 +81,19 @@
 				A3023BA826BC73A500A4820B /* Settings.bundle */,
 				A3F15FB125AE6092007770B1 /* Assets.xcassets */,
 				A3F15FB625AE6092007770B1 /* Info.plist */,
+				FC19CFDA27D2F56300F0BDAC /* Client-Bridging-Header.h */,
 			);
 			path = Client;
+			sourceTree = "<group>";
+		};
+		FC19CFDD27D2F56400F0BDAC /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				FC19CFDE27D2F56400F0BDAC /* SimplePing.h */,
+				FC19CFDF27D2F56400F0BDAC /* SimplePing.m */,
+				FC19CFE227D2F5BB00F0BDAC /* TraceRoute.swift */,
+			);
+			path = Network;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -109,6 +127,7 @@
 				TargetAttributes = {
 					A3F15FA425AE6090007770B1 = {
 						CreatedOnToolsVersion = 12.3;
+						LastSwiftMigration = 1320;
 					};
 				};
 			};
@@ -153,6 +172,8 @@
 				A3F15FA925AE6090007770B1 /* AppDelegate.swift in Sources */,
 				A3023BA726BC691500A4820B /* URLSession.swift in Sources */,
 				A3F15FAB25AE6090007770B1 /* SceneDelegate.swift in Sources */,
+				FC19CFE327D2F5BB00F0BDAC /* TraceRoute.swift in Sources */,
+				FC19CFE127D2F56400F0BDAC /* SimplePing.m in Sources */,
 				A3023BAB26BC759500A4820B /* Settings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -300,6 +321,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Client/Client.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -313,6 +335,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.couchbase.edge-tester";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Client/Client-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -323,6 +347,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Client/Client.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -336,6 +361,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.couchbase.edge-tester";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Client/Client-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
