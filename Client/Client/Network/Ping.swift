@@ -178,24 +178,28 @@ public class Ping : NSObject {
         log("--- ping statistics ---")
         
         let receivedPackets = sentPackets.values.filter { $0.interval != nil }
-        let transmitted = Double(sentPackets.count)
-        let received = Double(receivedPackets.count)
-        let percentLost = ((transmitted - received) / transmitted) * 100
+        let transmitted = sentPackets.count
+        let received = receivedPackets.count
+        let percentLost = (Double(transmitted - received) / Double(transmitted)) * 100
         let intervals = receivedPackets.map { $0.interval! }
         
-        let min = intervals.min()!
-        let max = intervals.max()!
-        let avg = intervals.reduce(0, +) / Double(intervals.count)
-        let distances = intervals.map { ($0 - avg) * ($0 - avg) }
-        let varience = distances.reduce(0, +) / Double(distances.count)
-        let stddev = sqrt(varience)
+        var min = 0.0, max = 0.0, avg = 0.0, stddev = 0.0
+        if intervals.count > 0 {
+            min = intervals.min()!
+            max = intervals.max()!
+            avg = intervals.reduce(0, +) / Double(intervals.count)
+            
+            let distances = intervals.map { ($0 - avg) * ($0 - avg) }
+            let varience = distances.reduce(0, +) / Double(distances.count)
+            stddev = sqrt(varience)
+        }
         
         let lostStr = String(format: "%.1f", percentLost)
         let minStr = String(format: "%.3f", min)
         let maxStr = String(format: "%.3f", max)
         let avgStr = String(format: "%.3f", avg)
         let stddevStr = String(format: "%.3f", stddev)
-                                    
+        
         log("\(transmitted) packets transmitted, \(received) packets received, \(lostStr) pct packet loss")
         log("round-trip min/avg/max/stddev = \(minStr)/\(avgStr)/\(maxStr)/\(stddevStr) ms")
     }
