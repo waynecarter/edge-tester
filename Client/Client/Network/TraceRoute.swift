@@ -1,6 +1,6 @@
 //
 //  TraceRoute.swift
-//  TraceRoute
+//  Client
 //
 //  Created by Pasin Suriyentrakorn on 3/4/22.
 //
@@ -82,8 +82,8 @@ public class TraceRoute : NSObject {
     
     private func finish() {
         resetTimeoutTimer()
-        self.pinger.stop()
-        self.finished = true
+        pinger.stop()
+        finished = true
     }
     
     private func sendNextTraceRoute() {
@@ -242,7 +242,7 @@ extension TraceRoute: SimplePingDelegate {
     public func simplePing(_ pinger: SimplePing, didFailWithError error: Error) {
         if pinger != self.pinger { return }
         
-        self.log("TraceRoute Error : \((error as NSError).code)")
+        self.log("traceroute : \(NetworkError.getErrorMessage(error: error))")
         finish()
     }
     

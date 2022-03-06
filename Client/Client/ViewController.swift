@@ -92,9 +92,12 @@ class ViewController: UIViewController {
         
         // Run Ping
         for i in 0..<targets.count {
-            // let target = targets[i]
-            // TODO: Ping target and log results
-            
+            let target = targets[i]
+            let ping = Ping(host: target.host) { result in
+                self.log(result)
+            }
+            ping.start()
+            log("")
             DispatchQueue.main.sync {
                 pingProgressView.progress = Float(i+1) / Float(targets.count)
             }
@@ -103,8 +106,8 @@ class ViewController: UIViewController {
         // Run TraceRoute
         for i in 0..<targets.count {
             let target = targets[i]
-            let trace = TraceRoute(host: target.host) { trace in
-                self.log(trace)
+            let trace = TraceRoute(host: target.host) { result in
+                self.log(result)
             }
             trace.start()
             log("")

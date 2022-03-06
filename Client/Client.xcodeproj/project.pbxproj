@@ -18,6 +18,8 @@
 		A3F15FB525AE6092007770B1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3F15FB325AE6092007770B1 /* LaunchScreen.storyboard */; };
 		FC19CFE127D2F56400F0BDAC /* SimplePing.m in Sources */ = {isa = PBXBuildFile; fileRef = FC19CFDF27D2F56400F0BDAC /* SimplePing.m */; };
 		FC19CFE327D2F5BB00F0BDAC /* TraceRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC19CFE227D2F5BB00F0BDAC /* TraceRoute.swift */; };
+		FC19CFEA27D45DFE00F0BDAC /* Ping.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC19CFE827D45DFE00F0BDAC /* Ping.swift */; };
+		FC19CFEB27D45DFE00F0BDAC /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC19CFE927D45DFE00F0BDAC /* NetworkError.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +39,8 @@
 		FC19CFDE27D2F56400F0BDAC /* SimplePing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimplePing.h; sourceTree = "<group>"; };
 		FC19CFDF27D2F56400F0BDAC /* SimplePing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SimplePing.m; sourceTree = "<group>"; };
 		FC19CFE227D2F5BB00F0BDAC /* TraceRoute.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TraceRoute.swift; sourceTree = "<group>"; };
+		FC19CFE827D45DFE00F0BDAC /* Ping.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Ping.swift; sourceTree = "<group>"; };
+		FC19CFE927D45DFE00F0BDAC /* NetworkError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +95,8 @@
 			children = (
 				FC19CFDE27D2F56400F0BDAC /* SimplePing.h */,
 				FC19CFDF27D2F56400F0BDAC /* SimplePing.m */,
+				FC19CFE927D45DFE00F0BDAC /* NetworkError.swift */,
+				FC19CFE827D45DFE00F0BDAC /* Ping.swift */,
 				FC19CFE227D2F5BB00F0BDAC /* TraceRoute.swift */,
 			);
 			path = Network;
@@ -171,8 +177,10 @@
 				A3F15FAD25AE6090007770B1 /* ViewController.swift in Sources */,
 				A3F15FA925AE6090007770B1 /* AppDelegate.swift in Sources */,
 				A3023BA726BC691500A4820B /* URLSession.swift in Sources */,
+				FC19CFEA27D45DFE00F0BDAC /* Ping.swift in Sources */,
 				A3F15FAB25AE6090007770B1 /* SceneDelegate.swift in Sources */,
 				FC19CFE327D2F5BB00F0BDAC /* TraceRoute.swift in Sources */,
+				FC19CFEB27D45DFE00F0BDAC /* NetworkError.swift in Sources */,
 				FC19CFE127D2F56400F0BDAC /* SimplePing.m in Sources */,
 				A3023BAB26BC759500A4820B /* Settings.swift in Sources */,
 			);
