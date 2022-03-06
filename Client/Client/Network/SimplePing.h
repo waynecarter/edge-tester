@@ -128,7 +128,7 @@ extern NSUInteger const kSimplePingDefaultDataSize;
 
 - (void)sendTraceRouteWithTTL:(int)ttl numMessages:(int)numMesgs;
 
-+ (NSString *)addressInIPv4Packet:(NSData *)packet;
++ (int)getTTLFromIPV4ResponsePacket:(NSData *)data;
 
 /*! Stops the object.
  *  \details You should call this when you're done pinging.

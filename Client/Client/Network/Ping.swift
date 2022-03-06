@@ -139,7 +139,13 @@ public class Ping : NSObject {
             assert(address != nil)
             let ipAddress = getHostNameInfo(address: address!, format: .IP_ADDRESS) ?? "?"
             let interval = String(format: "%.3f ms  ", sentPacket.interval!)
-            log("\(packet.count) bytes from \(ipAddress): icmp_seq=\(sequenceNumber!) time=\(interval)")
+            
+            var result = "\(packet.count) bytes from \(ipAddress): icmp_seq=\(sequenceNumber!)"
+            if let ttl = getTTL(packet: packet) {
+                result = result + " ttl=\(ttl)"
+            }
+            result = result + " time=\(interval)"
+            log(result)
         } else {
             if let err = error {
                 assert(sequenceNumber != nil)
@@ -156,6 +162,14 @@ public class Ping : NSObject {
         }
         
         sendNextPing()
+    }
+    
+    private func getTTL(packet: Data) -> Int? {
+        if pinger.hostAddressFamily != AF_INET {
+            return nil
+        }
+        let ttl = SimplePing.getTTLFromIPV4ResponsePacket(packet)
+        return ttl >= 0 ? Int(ttl) : nil
     }
     
     private func logSummary() {

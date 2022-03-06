@@ -336,6 +336,14 @@ static uint16_t in_cksum(const void *buffer, size_t bufferLen) {
     [self sendPingWithData:nil numMessages:numMesgs];
 }
 
++ (int)getTTLFromIPV4ResponsePacket:(NSData*)packet {
+    if (packet.length < sizeof(IPv4Header)) {
+        return -1;
+    }
+    const struct IPv4Header *ipPtr = (const IPv4Header *) packet.bytes;
+    return ipPtr->timeToLive;
+}
+
 /*! Calculates the offset of the ICMP header within an IPv4 packet.
  *  \details In the IPv4 case the kernel returns us a buffer that includes the 
  *      IPv4 header.  We're not interested in that, so we have to skip over it. 
@@ -363,19 +371,6 @@ static uint16_t in_cksum(const void *buffer, size_t bufferLen) {
         }
     }
     return result;
-}
-
-+ (NSString *)addressInIPv4Packet:(NSData *)packet {
-    const struct IPv4Header *ipPtr;
-    if (packet.length >= (sizeof(IPv4Header) + sizeof(ICMPHeader))) {
-        ipPtr = (const IPv4Header *) packet.bytes;
-        return [NSString stringWithFormat:@"%d.%d.%d.%d",
-                ipPtr->sourceAddress[0],
-                ipPtr->sourceAddress[1],
-                ipPtr->sourceAddress[2],
-                ipPtr->sourceAddress[3]];
-    }
-    return nil;
 }
 
 /*! Checks whether the specified sequence number is one we sent.
