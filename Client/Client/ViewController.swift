@@ -10,7 +10,7 @@ import UIKit
 class ViewController: UIViewController {
     private var out = String()
     @IBOutlet var pingProgressView: UIProgressView!
-    @IBOutlet var traceRouteProgressView: UIProgressView!
+    @IBOutlet var tracerouteProgressView: UIProgressView!
     @IBOutlet var testProgressView: UIProgressView!
     @IBOutlet var settingsButton: UIBarButtonItem!
     @IBOutlet var startButton: UIBarButtonItem!
@@ -27,7 +27,7 @@ class ViewController: UIViewController {
                 self.settingsButton.isEnabled = false
                 self.out.removeAll()
                 self.pingProgressView.progress = 0
-                self.traceRouteProgressView.progress = 0
+                self.tracerouteProgressView.progress = 0
                 self.testProgressView.progress = 0
             }
             
@@ -39,7 +39,7 @@ class ViewController: UIViewController {
                 self.present(alert, animated: true)
                 
                 self.pingProgressView.progress = 0
-                self.traceRouteProgressView.progress = 0
+                self.tracerouteProgressView.progress = 0
                 self.testProgressView.progress = 0
                 self.startButton.isEnabled = true
                 self.settingsButton.isEnabled = true
@@ -96,6 +96,7 @@ class ViewController: UIViewController {
         }
         for i in 0..<targets.count {
             let target = targets[i]
+            log("ping \(target.name)")
             let ping = Ping(host: target.host) { result in
                 self.log(result)
             }
@@ -106,19 +107,20 @@ class ViewController: UIViewController {
             }
         }
         
-        // Run TraceRoute
+        // Run Traceroute
         DispatchQueue.main.sync {
-            traceRouteProgressView.progress = 0.01
+            tracerouteProgressView.progress = 0.01
         }
         for i in 0..<targets.count {
             let target = targets[i]
-            let trace = TraceRoute(host: target.host) { result in
+            log("traceroute \(target.name)")
+            let trace = Traceroute(host: target.host) { result in
                 self.log(result)
             }
             trace.start()
             log("")
             DispatchQueue.main.sync {
-                traceRouteProgressView.progress = Float(i+1) / Float(targets.count)
+                tracerouteProgressView.progress = Float(i+1) / Float(targets.count)
             }
         }
         

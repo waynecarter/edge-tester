@@ -229,7 +229,7 @@ extension Ping: SimplePingDelegate {
         if pingCount == 0 {
             let hostname = getHostNameInfo(address: address, format: .HOSTNAME) ?? self.host
             let ipaddr = getHostNameInfo(address: address, format: .IP_ADDRESS) ?? "?"
-            self.log("PING \(hostname) (\(ipaddr)): \(kSimplePingDefaultDataSize) data bytes")
+            self.log("ping \(hostname) (\(ipaddr)): \(kSimplePingDefaultDataSize) data bytes")
             
             sentPackets.removeAll()
         }

@@ -43,7 +43,7 @@
                                         <rect key="frame" x="0.0" y="65" width="335" height="33"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                         <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Trace Route" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kwH-sk-xiE">
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Traceroute" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kwH-sk-xiE">
                                                 <rect key="frame" x="0.0" y="0.0" width="335" height="21"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -104,7 +104,7 @@
                         <outlet property="settingsButton" destination="edY-bN-9dJ" id="gTH-dn-Bcn"/>
                         <outlet property="startButton" destination="iFu-dc-mXe" id="wNO-rD-GmE"/>
                         <outlet property="testProgressView" destination="WLX-FH-OKR" id="Anw-i1-9ep"/>
-                        <outlet property="traceRouteProgressView" destination="fTR-nN-Auz" id="vEs-rc-aiY"/>
+                        <outlet property="tracerouteProgressView" destination="fTR-nN-Auz" id="vEs-rc-aiY"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

@@ -1,5 +1,5 @@
 //
-//  TraceRoute.swift
+//  Traceroute.swift
 //  Client
 //
 //  Created by Pasin Suriyentrakorn on 3/4/22.
@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-public class TraceRoute : NSObject {
+public class Traceroute : NSObject {
     public typealias TraceLog = (String) -> Void
     
     struct ResponsePacket {
@@ -227,13 +227,13 @@ public class TraceRoute : NSObject {
     }
 }
 
-extension TraceRoute: SimplePingDelegate {
+extension Traceroute: SimplePingDelegate {
     public func simplePing(_ pinger: SimplePing, didStartWithAddress address: Data) {
         if pinger != self.pinger { return }
         
         if ttl == 0 {
             let ipaddr = getHostNameInfo(address: address, format: .IP_ADDRESS) ?? "?"
-            self.log("traceroute to \(pinger.hostName) (\(ipaddr)), \(MAX_TTL) hops max, \(kSimplePingDefaultDataSize) byte packets")
+            self.log("traceroute \(pinger.hostName) (\(ipaddr)), \(MAX_TTL) hops max, \(kSimplePingDefaultDataSize) byte packets")
         }
         assert(ttl <= MAX_TTL)
         sendNextTraceRoute()
