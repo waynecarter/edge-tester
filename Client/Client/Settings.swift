@@ -27,18 +27,6 @@ class Settings {
         trimmed(UserDefaults.standard.string(forKey: "edge_target_host"))
     }
     
-    static var usePostForSetOperations: Bool {
-        let key = "use_post_for_set_operations"
-        let userDefaults = UserDefaults.standard
-        userDefaults.register(
-            defaults: [
-                key: true
-            ]
-        )
-        
-        return userDefaults.bool(forKey: key)
-    }
-    
     private static func trimmed(_ string: String?) -> String? {
         if let string = string?.trimmingCharacters(in: .whitespacesAndNewlines), string.count > 0 {
             return string

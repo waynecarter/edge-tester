@@ -130,27 +130,17 @@ class ViewController: UIViewController {
         let payloadSize = Settings.payloadSize
         for i in 1...testIterations {
             let data = string(withLength: payloadSize)
-            let json = "%7B%22data%22:%22\(data)%22%7D"
+            let json = "{'data':'\(data)'}"
 
             for target in targets {
                 let setResult: RequestResult = {
-                    if Settings.usePostForSetOperations {
-                        return makeRequest(
-                            toURL: setUrlString(
-                                withHost: target.host,
-                                iterationIndex: i
-                            ),
-                            withBody: json
-                        )
-                    } else {
-                        return makeRequest(
-                            toURL: setUrlString(
-                                withHost: target.host,
-                                iterationIndex: i,
-                                json: json
-                            )
-                        )
-                    }
+                    return makeRequest(
+                        toURL: setUrlString(
+                            withHost: target.host,
+                            iterationIndex: i
+                        ),
+                        withBody: json
+                    )
                 }()
                 log(target: target.name, requestType: "Set", result: setResult)
 
@@ -162,7 +152,7 @@ class ViewController: UIViewController {
                 )
                 log(target: target.name, requestType: "Get", result: getResult)
 
-                let setString = json.removingPercentEncoding
+                let setString = json
                 let getString = String(data: getResult.data ?? Data(), encoding: String.Encoding.utf8)
                 if setString != getString {
                     log("Error: Get value is not equal to the value Set.")
@@ -194,10 +184,6 @@ class ViewController: UIViewController {
         return "http://\(host):8080/set?id=object\(iterationIndex)"
     }
     
-    private func setUrlString(withHost host: String, iterationIndex: Int, json: String) -> String {
-        return "http://\(host):8080/set?id=object\(iterationIndex)&json=\(json)"
-    }
-    
     private func resultsUrlString(withHost host: String) -> String {
         return "http://\(host):8080/results"
     }
@@ -209,6 +195,7 @@ class ViewController: UIViewController {
         
         if let body = body {
             request.httpMethod = "POST"
+            request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
             request.setValue("\(body.lengthOfBytes(using: .utf8))", forHTTPHeaderField: "Content-Length")
             request.httpBody = body.data(using: .utf8)
         }
