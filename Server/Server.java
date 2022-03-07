@@ -103,7 +103,7 @@ public class Server {
                     byte[] body = new byte[contentLength];
                     exchange.getRequestBody().read(body);
                     
-                    json = URLDecoder.decode(new String(body, StandardCharsets.UTF_8), StandardCharsets.UTF_8.name());
+                    json = new String(body, StandardCharsets.UTF_8);
                 }
 
                 double dbStartTime = System.nanoTime();
@@ -124,7 +124,7 @@ public class Server {
                 if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                     int contentLength = Integer.parseInt(exchange.getRequestHeaders().getFirst("Content-Length"));
                     byte[] body = exchange.getRequestBody().readNBytes(contentLength);
-                    String resultsString = URLDecoder.decode(new String(body, StandardCharsets.UTF_8), StandardCharsets.UTF_8.name());
+                    String resultsString = new String(body, StandardCharsets.UTF_8);
 
                     results.set(resultsString);
                     
