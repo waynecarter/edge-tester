@@ -91,6 +91,9 @@ class ViewController: UIViewController {
         ]
         
         // Run Ping
+        DispatchQueue.main.sync {
+            pingProgressView.progress = 0.01
+        }
         for i in 0..<targets.count {
             let target = targets[i]
             let ping = Ping(host: target.host) { result in
@@ -104,6 +107,9 @@ class ViewController: UIViewController {
         }
         
         // Run TraceRoute
+        DispatchQueue.main.sync {
+            traceRouteProgressView.progress = 0.01
+        }
         for i in 0..<targets.count {
             let target = targets[i]
             let trace = TraceRoute(host: target.host) { result in
