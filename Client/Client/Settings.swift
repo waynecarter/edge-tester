@@ -27,6 +27,30 @@ class Settings {
         trimmed(UserDefaults.standard.string(forKey: "edge_target_host"))
     }
     
+    static var shouldPing: Bool {
+        let userDefaults = UserDefaults.standard
+        let key = "tests_ping"
+        userDefaults.register(defaults: [key : true])
+        
+        return UserDefaults.standard.bool(forKey: key)
+    }
+    
+    static var shouldTraceroute: Bool {
+        let userDefaults = UserDefaults.standard
+        let key = "tests_traceroute"
+        userDefaults.register(defaults: [key : true])
+        
+        return UserDefaults.standard.bool(forKey: key)
+    }
+    
+    static var shouldTestLatency: Bool {
+        let userDefaults = UserDefaults.standard
+        let key = "tests_latency"
+        userDefaults.register(defaults: [key : true])
+        
+        return UserDefaults.standard.bool(forKey: key)
+    }
+    
     private static func trimmed(_ string: String?) -> String? {
         if let string = string?.trimmingCharacters(in: .whitespacesAndNewlines), string.count > 0 {
             return string

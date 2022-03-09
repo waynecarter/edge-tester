@@ -9,6 +9,7 @@ import UIKit
 
 class ViewController: UIViewController {
     private var out = String()
+    @IBOutlet var accessProgressView: UIProgressView!
     @IBOutlet var pingProgressView: UIProgressView!
     @IBOutlet var tracerouteProgressView: UIProgressView!
     @IBOutlet var testProgressView: UIProgressView!
@@ -36,13 +37,13 @@ class ViewController: UIViewController {
             DispatchQueue.main.sync {
                 let alert = UIAlertController(title: "Test complete.", message: nil, preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                self.present(alert, animated: true)
-                
-                self.pingProgressView.progress = 0
-                self.tracerouteProgressView.progress = 0
-                self.testProgressView.progress = 0
-                self.startButton.isEnabled = true
-                self.settingsButton.isEnabled = true
+                self.present(alert, animated: true) {
+                    self.pingProgressView.progress = 0
+                    self.tracerouteProgressView.progress = 0
+                    self.testProgressView.progress = 0
+                    self.startButton.isEnabled = true
+                    self.settingsButton.isEnabled = true
+                }
             }
         }
     }
@@ -90,81 +91,93 @@ class ViewController: UIViewController {
             Target(name: edgeTargetName!, host: edgeTargetHost!)
         ]
         
-        // Run Ping
-        DispatchQueue.main.sync {
-            pingProgressView.progress = 0.01
-        }
-        for i in 0..<targets.count {
-            let target = targets[i]
-            log("ping \(target.name)")
-            let ping = Ping(host: target.host) { result in
-                self.log(result)
-            }
-            ping.start()
-            log("")
-            DispatchQueue.main.sync {
-                pingProgressView.progress = Float(i+1) / Float(targets.count)
-            }
-        }
+        // TODO: Make request to /ping enpoint
+        // TODO: Track progress using accessProgressView
+        // TODO: If /ping endpoint for all targets are not accessible,
+        // > TODO: Display error message
+        // > TODO: Exit
         
-        // Run Traceroute
-        DispatchQueue.main.sync {
-            tracerouteProgressView.progress = 0.01
-        }
-        for i in 0..<targets.count {
-            let target = targets[i]
-            log("traceroute \(target.name)")
-            let trace = Traceroute(host: target.host) { result in
-                self.log(result)
-            }
-            trace.start()
-            log("")
+        // If enabled, run ping
+        if Settings.shouldPing {
             DispatchQueue.main.sync {
-                tracerouteProgressView.progress = Float(i+1) / Float(targets.count)
+                pingProgressView.progress = 0.01
             }
-        }
-        
-        // Run tests
-        logHeaders()
-        let testIterations = Settings.testIterations
-        let payloadSize = Settings.payloadSize
-        for i in 1...testIterations {
-            let data = string(withLength: payloadSize)
-            let json = "{\"data\":\"\(data)\"}"
-
-            for target in targets {
-                let setResult: RequestResult = {
-                    return makeRequest(
-                        toURL: setUrlString(
-                            withHost: target.host,
-                            iterationIndex: i
-                        ),
-                        withBody: json
-                    )
-                }()
-                log(target: target.name, requestType: "Set", result: setResult)
-
-                let getResult = makeRequest(
-                    toURL: getUrlString(
-                        withHost: target.host,
-                        iterationIndex: i
-                    )
-                )
-                log(target: target.name, requestType: "Get", result: getResult)
-
-                let setString = json
-                let getString = String(data: getResult.data ?? Data(), encoding: String.Encoding.utf8)
-                if setString != getString {
-                    log("Error: Get value is not equal to the value Set.")
+            for i in 0..<targets.count {
+                let target = targets[i]
+                log("ping \(target.name)")
+                let ping = Ping(host: target.host) { result in
+                    self.log(result)
+                }
+                ping.start()
+                log("")
+                DispatchQueue.main.sync {
+                    pingProgressView.progress = Float(i+1) / Float(targets.count)
                 }
             }
-            
+        }
+        
+        // If enabled, run traceroute
+        if Settings.shouldTraceroute {
             DispatchQueue.main.sync {
-                testProgressView.progress = Float(i) / Float(testIterations)
+                tracerouteProgressView.progress = 0.01
             }
-            
-            // Sleep 1 second
-            sleep(1)
+            for i in 0..<targets.count {
+                let target = targets[i]
+                log("traceroute \(target.name)")
+                let trace = Traceroute(host: target.host) { result in
+                    self.log(result)
+                }
+                trace.start()
+                log("")
+                DispatchQueue.main.sync {
+                    tracerouteProgressView.progress = Float(i+1) / Float(targets.count)
+                }
+            }
+        }
+        
+        // If enabled, run latency tests
+        if Settings.shouldTestLatency {
+            logHeaders()
+            let testIterations = Settings.testIterations
+            let payloadSize = Settings.payloadSize
+            for i in 1...testIterations {
+                let data = string(withLength: payloadSize)
+                let json = "{\"data\":\"\(data)\"}"
+
+                for target in targets {
+                    let setResult: RequestResult = {
+                        return makeRequest(
+                            toURL: setUrlString(
+                                withHost: target.host,
+                                iterationIndex: i
+                            ),
+                            withBody: json
+                        )
+                    }()
+                    log(target: target.name, requestType: "Set", result: setResult)
+
+                    let getResult = makeRequest(
+                        toURL: getUrlString(
+                            withHost: target.host,
+                            iterationIndex: i
+                        )
+                    )
+                    log(target: target.name, requestType: "Get", result: getResult)
+
+                    let setString = json
+                    let getString = String(data: getResult.data ?? Data(), encoding: String.Encoding.utf8)
+                    if setString != getString {
+                        log("Error: Get value is not equal to the value Set.")
+                    }
+                }
+                
+                DispatchQueue.main.sync {
+                    testProgressView.progress = Float(i) / Float(testIterations)
+                }
+                
+                // Sleep 1 second
+                sleep(1)
+            }
         }
         
         // Post results
@@ -182,6 +195,10 @@ class ViewController: UIViewController {
     
     private func setUrlString(withHost host: String, iterationIndex: Int) -> String {
         return "http://\(host):8080/set?id=object\(iterationIndex)"
+    }
+    
+    private func pingUrlString(withHost host: String) -> String {
+        return "http://\(host):8080/ping"
     }
     
     private func resultsUrlString(withHost host: String) -> String {
