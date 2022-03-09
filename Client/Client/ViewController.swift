@@ -35,15 +35,18 @@ class ViewController: UIViewController {
             self.runTest()
             
             DispatchQueue.main.sync {
-                let alert = UIAlertController(title: "Test complete.", message: nil, preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                self.present(alert, animated: true) {
-                    self.pingProgressView.progress = 0
-                    self.tracerouteProgressView.progress = 0
-                    self.testProgressView.progress = 0
-                    self.startButton.isEnabled = true
-                    self.settingsButton.isEnabled = true
-                }
+                let alert = UIAlertController(title: "Test Complete", message: nil, preferredStyle: .alert)
+                alert.addAction(
+                    UIAlertAction(title: "OK", style: .default, handler: { _ in
+                        self.accessProgressView.progress = 0
+                        self.pingProgressView.progress = 0
+                        self.tracerouteProgressView.progress = 0
+                        self.testProgressView.progress = 0
+                        self.startButton.isEnabled = true
+                        self.settingsButton.isEnabled = true
+                    })
+                )
+                self.present(alert, animated: true)
             }
         }
     }
@@ -91,6 +94,7 @@ class ViewController: UIViewController {
             Target(name: edgeTargetName!, host: edgeTargetHost!)
         ]
         
+        // Test that all targets are accessible
         DispatchQueue.main.sync {
             accessProgressView.progress = 0.01
         }
@@ -104,20 +108,29 @@ class ViewController: UIViewController {
                 )
             }()
             if pingResult.status != 200 {
+                var shouldContinue = true
+                
                 DispatchQueue.main.sync {
-                    var message = "Cannot access \(target.host)\nStatus \(pingResult.status)"
+                    var message = "Cannot access \(target.name)\nStatus \(pingResult.status)"
                     if let error = pingResult.error {
                         let nserror = error as NSError
                         message = message + "\n\(nserror.localizedDescription)"
                     }
                     
-                    let alert = UIAlertController(title: "Test failed.", message: message, preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    self.present(alert, animated: true) {
-                        self.accessProgressView.progress = 0
-                        self.startButton.isEnabled = true
-                        self.settingsButton.isEnabled = true
-                    }
+                    let alert = UIAlertController(title: "Test Failed", message: message, preferredStyle: .alert)
+                    alert.addAction(
+                        UIAlertAction(title: "OK", style: .default, handler: { _ in
+                            shouldContinue = true
+                        })
+                    )
+                    
+                    shouldContinue = false
+                    self.present(alert, animated: true)
+                }
+                
+                
+                while shouldContinue == false {
+                    RunLoop.main.run(until: Date(timeIntervalSinceNow: 1.0))
                 }
                 return
             }
@@ -309,6 +322,11 @@ class ViewController: UIViewController {
 
     private func log(target: String, requestType: String, result: RequestResult) {
         log("\(target),\(requestType),\(result.status),\(result.start),\(result.duration),\(result.serverDuration),\(result.dbDuration)")
+        
+        if let error = result.error {
+            let nserror = error as NSError
+            log("Error: \(nserror.localizedDescription)")
+        }
     }
     
     private func log(_ string: String) {
