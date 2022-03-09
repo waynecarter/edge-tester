@@ -130,7 +130,7 @@ class ViewController: UIViewController {
         let payloadSize = Settings.payloadSize
         for i in 1...testIterations {
             let data = string(withLength: payloadSize)
-            let json = "{'data':'\(data)'}"
+            let json = "{\"data\":\"\(data)\"}"
 
             for target in targets {
                 let setResult: RequestResult = {
