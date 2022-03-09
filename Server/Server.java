@@ -146,6 +146,15 @@ public class Server {
             }
         });
 
+        _server.createContext("/ping", new HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                _addResponseHeaders(exchange, null);
+
+                exchange.sendResponseHeaders(200, -1);
+                exchange.close();
+            }
+        });
+
         _server.start();
     }
 
