@@ -91,11 +91,40 @@ class ViewController: UIViewController {
             Target(name: edgeTargetName!, host: edgeTargetHost!)
         ]
         
-        // TODO: Make request to /ping enpoint
-        // TODO: Track progress using accessProgressView
-        // TODO: If /ping endpoint for all targets are not accessible,
-        // > TODO: Display error message
-        // > TODO: Exit
+        DispatchQueue.main.sync {
+            accessProgressView.progress = 0.01
+        }
+        for i in 0..<targets.count {
+            let target = targets[i]
+            let pingResult: RequestResult = {
+                return makeRequest(
+                    toURL: pingUrlString(
+                        withHost: target.host
+                    )
+                )
+            }()
+            if pingResult.status != 200 {
+                DispatchQueue.main.sync {
+                    var message = "Cannot access \(target.host)\nStatus \(pingResult.status)"
+                    if let error = pingResult.error {
+                        let nserror = error as NSError
+                        message = message + "\n\(nserror.localizedDescription)"
+                    }
+                    
+                    let alert = UIAlertController(title: "Test failed.", message: message, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                    self.present(alert, animated: true) {
+                        self.accessProgressView.progress = 0
+                        self.startButton.isEnabled = true
+                        self.settingsButton.isEnabled = true
+                    }
+                }
+                return
+            }
+            DispatchQueue.main.sync {
+                accessProgressView.progress = Float(i+1) / Float(targets.count)
+            }
+        }
         
         // If enabled, run ping
         if Settings.shouldPing {
@@ -250,6 +279,7 @@ class ViewController: UIViewController {
         return RequestResult(
             data: taskResult.data,
             status: statusCode,
+            error: taskResult.error,
             start: startTime,
             duration: endTime - startTime,
             serverDuration: serverDuration,
@@ -260,6 +290,7 @@ class ViewController: UIViewController {
     struct RequestResult {
         let data: Data?
         let status: Int
+        let error: Error?
         let start: Double
         let duration: Double
         let serverDuration: Double
